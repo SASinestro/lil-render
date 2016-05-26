@@ -1,6 +1,6 @@
 module Main where
 
-import BMP.Format
+import Image.TGA
 
 
 main :: IO ()

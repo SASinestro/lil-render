@@ -15,11 +15,10 @@ cabal-version:        >=1.10
 
 executable lil-render
   main-is:            Main.hs
-  other-modules:      BMP.Format
+  other-modules:      Image.TGA
   build-depends:      base         >= 4.7    && < 5
                     , binary       >= 0.7.5  && < 0.8
                     , bytestring   >= 0.10.6 && < 0.11
-                    , data-default >= 0.5.3  && < 0.6
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances

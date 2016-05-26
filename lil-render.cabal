@@ -15,15 +15,19 @@ cabal-version:        >=1.10
 
 executable lil-render
   main-is:            Main.hs
-  other-modules:      Image.TGA
-  build-depends:      base         >= 4.7    && < 5
-                    , binary       >= 0.7.5  && < 0.8
-                    , bytestring   >= 0.10.6 && < 0.11
+  other-modules:      Image
+                    , Image.TGA
+  build-depends:      base         >= 4.7     && < 5
+                    , binary       >= 0.7.5   && < 0.8
+                    , bytestring   >= 0.10.6  && < 0.11
+                    , array        >= 0.5.1.1 && < 0.6
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
                       , GADTs
                       , StandaloneDeriving
+                      , DeriveFunctor
+                      , BinaryLiterals
 
   hs-source-dirs:     src
   default-language:   Haskell2010

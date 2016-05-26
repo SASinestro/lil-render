@@ -1,0 +1,30 @@
+name:                 lil-render
+version:              0.1.0.0
+synopsis:             The worst 3D renderer ever created.
+-- description:
+-- license:
+-- license-file:
+homepage:             
+author:               Alexis Williams
+maintainer:           sasinestro@gmail.com
+category:             
+-- copyright:
+build-type:           Simple
+cabal-version:        >=1.10
+
+
+executable lil-render
+  main-is:            Main.hs
+  other-modules:      BMP.Format
+  build-depends:      base         >= 4.7    && < 5
+                    , binary       >= 0.7.5  && < 0.8
+                    , bytestring   >= 0.10.6 && < 0.11
+                    , data-default >= 0.5.3  && < 0.6
+  default-extensions:   DeriveGeneric
+                      , OverloadedStrings
+                      , FlexibleInstances
+                      , GADTs
+                      , StandaloneDeriving
+
+  hs-source-dirs:     src
+  default-language:   Haskell2010

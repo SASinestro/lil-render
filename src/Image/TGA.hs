@@ -1,16 +1,43 @@
 module Image.TGA (
       LittleEndian(..)
     , TGAHeader(..)
+    , simple_tga_header
     , TGAImageType(..)
     , TGAOrigin(..)
     , TGADataStorage(..)
     , TGAImageDescriptor(..)
     , TGAImage(..)
+    , write_tga
     , TGAColor(..)
-    , TGAImageData
+    , TGAImageData(..)
+    -- Lenses
+    , tga_id_field_len
+    , tga_has_color_map
+    , tga_image_type
+    , tga_color_map_offset
+    , tga_color_map_length
+    , tga_color_map_depth
+    , tga_x_origin
+    , tga_y_origin
+    , tga_width
+    , tga_height
+    , tga_bit_depth
+    , tga_image_descriptor
+    , tga_attribute_bits_per_pixel
+    , tga_screen_origin
+    , tga_data_storage
+    , tga_header
+    , tga_color_map
+    , tga_image_data
+    , tga_red
+    , tga_green
+    , tga_blue
+    , tga_alpha
 ) where
 
+import Control.Lens
 import Control.Monad
+import Data.Array
 import Data.Bits
 import Data.Int
 import Data.Word
@@ -46,21 +73,37 @@ instance Binary (LittleEndian Word32) where
     put = putWord32le . fromLE
     get = liftM LittleEndian getWord32le
 
-
 data TGAHeader = TGAHeader {
-      tga_id_field_len     :: Word8
-    , tga_color_map_type   :: Word8
-    , tga_image_type       :: TGAImageType
-    , tga_color_map_offset :: LittleEndian Word16
-    , tga_color_map_length :: LittleEndian Word16
-    , tga_color_map_depth  :: Word8
-    , tga_x_origin         :: LittleEndian Word16
-    , tga_y_origin         :: LittleEndian Word16
-    , tga_width            :: LittleEndian Word16
-    , tga_height           :: LittleEndian Word16
-    , tga_bit_depth        :: Word8
-    , tga_image_descriptor :: TGAImageDescriptor
+      _tga_id_field_len     :: Word8
+    , _tga_has_color_map    :: Bool
+    , _tga_image_type       :: TGAImageType
+    , _tga_color_map_offset :: LittleEndian Word16
+    , _tga_color_map_length :: LittleEndian Word16
+    , _tga_color_map_depth  :: Word8
+    , _tga_x_origin         :: LittleEndian Word16
+    , _tga_y_origin         :: LittleEndian Word16
+    , _tga_width            :: LittleEndian Word16
+    , _tga_height           :: LittleEndian Word16
+    , _tga_bit_depth        :: Word8
+    , _tga_image_descriptor :: TGAImageDescriptor
 } deriving (Show, Eq, Generic)
+
+simple_tga_header :: (Integral a) => a -> a -> TGAHeader
+-- Usually, it'll be an unindexed, uncompressed, 24-bit image being outputted
+simple_tga_header width height = TGAHeader {
+      _tga_id_field_len = 0
+    , _tga_has_color_map = False
+    , _tga_image_type = TGAUncompressedRGBA
+    , _tga_color_map_offset = 0
+    , _tga_color_map_length = 0
+    , _tga_color_map_depth  = 0
+    , _tga_x_origin = 0
+    , _tga_y_origin = 0
+    , _tga_width = fromIntegral width
+    , _tga_height = fromIntegral height
+    , _tga_bit_depth = 24
+    , _tga_image_descriptor = TGAImageDescriptor { _tga_attribute_bits_per_pixel = 0, _tga_screen_origin = TGALowerLeft, _tga_data_storage = TGANonInterleaved }
+}
 
 data TGAImageType = TGAUncompressedIndexed | TGAUncompressedRGBA | TGARLEIndexed | TGA_RLE_RGBA deriving (Show, Eq)
 
@@ -79,8 +122,6 @@ instance Binary TGAImageType where
     put = putWord8 . (fromIntegral :: Int -> Word8) . fromEnum
     get = liftM (toEnum . (fromIntegral :: Word8 -> Int)) getWord8
 
-
-
 data TGAOrigin = TGALowerLeft | TGAUpperLeft deriving (Show, Eq, Enum, Generic)
 
 data TGADataStorage = TGANonInterleaved
@@ -90,9 +131,9 @@ data TGADataStorage = TGANonInterleaved
                     deriving (Show, Eq, Enum, Generic)
 
 data TGAImageDescriptor = TGAImageDescriptor {
-      tga_attribute_bits_per_pixel :: Word8
-    , tga_screen_origin :: TGAOrigin
-    , tga_data_storage :: TGADataStorage
+      _tga_attribute_bits_per_pixel :: Word8
+    , _tga_screen_origin :: TGAOrigin
+    , _tga_data_storage :: TGADataStorage
 } deriving (Show, Eq)
 
 instance Binary TGADataStorage
@@ -108,28 +149,35 @@ instance Binary TGAImageDescriptor where
 
         return $ TGAImageDescriptor bits_per_pixel origin interleaving
     put desc = do
-        let byte = (tga_attribute_bits_per_pixel desc)
-                 + (flip shiftL 5 . fromIntegral . fromEnum $ tga_screen_origin desc)
-                 + (flip shiftL 6 . fromIntegral . fromEnum $ tga_data_storage desc)
+        let byte = (_tga_attribute_bits_per_pixel desc)
+                 + (flip shiftL 5 . fromIntegral . fromEnum $ _tga_screen_origin desc)
+                 + (flip shiftL 6 . fromIntegral . fromEnum $ _tga_data_storage desc)
 
         putWord8 byte
 
 instance Binary TGAHeader
 
 data TGAImage = TGAImage {
-      tga_header     :: TGAHeader
-    , tga_color_map  :: TGAColorMap
-    , tga_image_data :: TGAImageData
+      _tga_header     :: TGAHeader
+    , _tga_color_map  :: TGAColorMap
+    , _tga_image_data :: TGAImageData
 } deriving (Show, Eq)
+
+read_tga :: FilePath -> IO TGAImage
+read_tga = decode_file
+
+write_tga :: FilePath -> TGAImage -> IO ()
+write_tga = encode_file
+
 
 data TGAColor = TGAColor {
-      tga_red   :: Word8
-    , tga_green :: Word8
-    , tga_blue  :: Word8
-    , tga_alpha :: Word8
+      _tga_red   :: Word8
+    , _tga_green :: Word8
+    , _tga_blue  :: Word8
+    , _tga_alpha :: Word8
 } deriving (Show, Eq)
 
-type TGAColorMap = [TGAColor]
+type TGAColorMap = Array Int TGAColor
 type TGAColorMapIndex = Word8 -- At least for the files I'm looking at
 
 data TGAImageData = TGAIndexedData [TGAColorMapIndex] | TGAUnmappedData [TGAColor] deriving (Show, Eq)
@@ -137,19 +185,19 @@ data TGAImageData = TGAIndexedData [TGAColorMapIndex] | TGAUnmappedData [TGAColo
 -- THE REAL DARK SOULS BEGINS HERE
 instance Binary TGAImage where
     get = do
-        tga_header' <- get
+        _tga_header' <- get
 
-        color_map <- if tga_color_map_type tga_header' == 1
+        color_map <- liftM (listArray (0, (fromIntegral . fromLE . _tga_color_map_length $ _tga_header') - 1)) $ if _tga_has_color_map _tga_header'
                             then do
-                                skip $ fromIntegral . fromLE . tga_color_map_offset $ tga_header'
-                                replicateM (fromIntegral . fromLE . tga_color_map_length $ tga_header') $ get_color $ tga_color_map_depth $ tga_header'
+                                skip $ fromIntegral . fromLE . _tga_color_map_offset $ _tga_header'
+                                replicateM (fromIntegral . fromLE . _tga_color_map_length $ _tga_header') $ get_color $ _tga_color_map_depth $ _tga_header'
                             else return []
 
-        image_data <- if tga_color_map_type tga_header' == 1
-                            then liftM TGAIndexedData $ replicateM (fromIntegral . fromLE $ tga_width tga_header' * tga_height tga_header') $ (get :: Get TGAColorMapIndex)
-                            else liftM TGAUnmappedData $ replicateM (fromIntegral . fromLE $ tga_width tga_header' * tga_height tga_header') $ get_color $ tga_bit_depth tga_header'
+        image_data <- if _tga_has_color_map _tga_header'
+                            then liftM TGAIndexedData $ replicateM (fromIntegral . fromLE $ _tga_width _tga_header' * _tga_height _tga_header') $ (get :: Get TGAColorMapIndex)
+                            else liftM TGAUnmappedData $ replicateM (fromIntegral . fromLE $ _tga_width _tga_header' * _tga_height _tga_header') $ get_color $ _tga_bit_depth _tga_header'
 
-        return $ TGAImage tga_header' color_map image_data
+        return $ TGAImage _tga_header' color_map image_data
         where
             -- Don't ask me, I'm just a girl!
             five_bit_to_eight_bit five = (five * 527 + 23) `shiftR` 6
@@ -197,10 +245,15 @@ instance Binary TGAImage where
             get_color n = fail "Unsupported pixel format."
 
     put image = do
-        put $ tga_header image
-        replicateM_ (fromIntegral . fromLE . tga_color_map_offset . tga_header $ image) $ putWord8 0
-        mapM_ (put_color $ tga_bit_depth . tga_header $ image) $ tga_color_map image
-        put_image_data (tga_bit_depth . tga_header $ image) $ tga_image_data image
+        put $ _tga_header image
+        replicateM_ (fromIntegral . fromLE . _tga_color_map_offset . _tga_header $ image) $ putWord8 0
+
+        if _tga_has_color_map . _tga_header $ image then
+            mapM_ (put_color $ _tga_bit_depth . _tga_header $ image) $ _tga_color_map image
+        else
+            return ()
+
+        put_image_data (_tga_bit_depth . _tga_header $ image) $ _tga_image_data image
         where
             -- 'what the fuck?' is both appropriate and a good reference here!
             eight_bit_to_five_bit :: Word8 -> Word16 -- Bullshit to make the types line up right, don't question it.
@@ -208,31 +261,36 @@ instance Binary TGAImage where
 
             put_color :: Word8 -> TGAColor -> Put
             put_color 15 color = do
-                let red' = eight_bit_to_five_bit . tga_red $ color
-                let green' = eight_bit_to_five_bit . tga_green $ color
-                let blue' = eight_bit_to_five_bit . tga_blue $ color
+                let red' = eight_bit_to_five_bit . _tga_red $ color
+                let green' = eight_bit_to_five_bit . _tga_green $ color
+                let blue' = eight_bit_to_five_bit . _tga_blue $ color
 
                 let output = red' + (green' `shiftL` 5) + (blue' `shiftL` 10)
                 putWord16le output
             put_color 16 color = do
-                let red' = eight_bit_to_five_bit . tga_red $ color
-                let green' = eight_bit_to_five_bit . tga_green $ color
-                let blue' = eight_bit_to_five_bit . tga_blue $ color
-                let alpha' = if tga_alpha color >= 128 then 1 else 0
+                let red' = eight_bit_to_five_bit . _tga_red $ color
+                let green' = eight_bit_to_five_bit . _tga_green $ color
+                let blue' = eight_bit_to_five_bit . _tga_blue $ color
+                let alpha' = if _tga_alpha color >= 128 then 1 else 0
 
                 let output = red' + (green' `shiftL` 5) + (blue' `shiftL` 10) + (alpha' `shiftL` 15)
                 putWord16le output
             put_color 24 color = do
-                putWord8 . tga_blue $ color
-                putWord8 . tga_green $ color
-                putWord8 . tga_red $ color
+                putWord8 . _tga_blue $ color
+                putWord8 . _tga_green $ color
+                putWord8 . _tga_red $ color
             put_color 32 color = do
-                putWord8 . tga_blue $ color
-                putWord8 . tga_green $ color
-                putWord8 . tga_red $ color
-                putWord8 . tga_alpha $ color
+                putWord8 . _tga_blue $ color
+                putWord8 . _tga_green $ color
+                putWord8 . _tga_red $ color
+                putWord8 . _tga_alpha $ color
+            put_color n _ = fail "Unsupported pixel format."
 
             put_image_data :: Word8 -> TGAImageData -> Put
             put_image_data _ (TGAIndexedData indexes) = mapM_ putWord8 indexes
             put_image_data depth (TGAUnmappedData colors) = mapM_ (put_color depth) colors
 
+makeLenses ''TGAHeader
+makeLenses ''TGAImageDescriptor
+makeLenses ''TGAImage
+makeLenses ''TGAColor

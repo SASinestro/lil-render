@@ -7,8 +7,8 @@ module Image.TGA (
     , TGADataStorage(..)
     , TGAImageDescriptor(..)
     , TGAImage(..)
+    , read_tga
     , write_tga
-    , TGAColor(..)
     , TGAImageData(..)
     -- Lenses
     , tga_id_field_len
@@ -29,10 +29,6 @@ module Image.TGA (
     , tga_header
     , tga_color_map
     , tga_image_data
-    , tga_red
-    , tga_green
-    , tga_blue
-    , tga_alpha
 ) where
 
 import Control.Lens
@@ -41,6 +37,7 @@ import Data.Array
 import Data.Bits
 import Data.Int
 import Data.Word
+import Image.Color
 import GHC.Generics
 
 import Data.Binary
@@ -164,23 +161,16 @@ data TGAImage = TGAImage {
 } deriving (Show, Eq)
 
 read_tga :: FilePath -> IO TGAImage
-read_tga = decode_file
+read_tga = decodeFile
 
 write_tga :: FilePath -> TGAImage -> IO ()
-write_tga = encode_file
+write_tga = encodeFile
 
 
-data TGAColor = TGAColor {
-      _tga_red   :: Word8
-    , _tga_green :: Word8
-    , _tga_blue  :: Word8
-    , _tga_alpha :: Word8
-} deriving (Show, Eq)
-
-type TGAColorMap = Array Int TGAColor
+type TGAColorMap = Array Int RGBColor
 type TGAColorMapIndex = Word8 -- At least for the files I'm looking at
 
-data TGAImageData = TGAIndexedData [TGAColorMapIndex] | TGAUnmappedData [TGAColor] deriving (Show, Eq)
+data TGAImageData = TGAIndexedData [TGAColorMapIndex] | TGAUnmappedData [RGBColor] deriving (Show, Eq)
 
 -- THE REAL DARK SOULS BEGINS HERE
 instance Binary TGAImage where
@@ -202,7 +192,7 @@ instance Binary TGAImage where
             -- Don't ask me, I'm just a girl!
             five_bit_to_eight_bit five = (five * 527 + 23) `shiftR` 6
 
-            get_color :: Word8 -> Get TGAColor
+            get_color :: Word8 -> Get RGBColor
             get_color 15 = do
                 byte1 <- getWord8
                 byte2 <- getWord8
@@ -216,7 +206,7 @@ instance Binary TGAImage where
                 let green = five_bit_to_eight_bit green'
                 let blue = five_bit_to_eight_bit blue'
 
-                return $ TGAColor red green blue alpha
+                return $ RGBColor red green blue alpha
             get_color 16 = do
                 byte1 <- getWord8
                 byte2 <- getWord8
@@ -230,18 +220,18 @@ instance Binary TGAImage where
                 let green = five_bit_to_eight_bit green'
                 let blue = five_bit_to_eight_bit blue'
 
-                return $ TGAColor red green blue alpha
+                return $ RGBColor red green blue alpha
             get_color 24 = do
                 blue <- getWord8
                 green <- getWord8
                 red <- getWord8
-                return $ TGAColor red green blue 255
+                return $ RGBColor red green blue 255
             get_color 32 = do
                 blue <- getWord8
                 green <- getWord8
                 red <- getWord8
                 alpha <- getWord8
-                return $ TGAColor red green blue alpha
+                return $ RGBColor red green blue alpha
             get_color n = fail "Unsupported pixel format."
 
     put image = do
@@ -259,31 +249,31 @@ instance Binary TGAImage where
             eight_bit_to_five_bit :: Word8 -> Word16 -- Bullshit to make the types line up right, don't question it.
             eight_bit_to_five_bit eight = ((fromIntegral eight :: Word16) * 249 + 1014) `shiftR` 11
 
-            put_color :: Word8 -> TGAColor -> Put
+            put_color :: Word8 -> RGBColor -> Put
             put_color 15 color = do
-                let red' = eight_bit_to_five_bit . _tga_red $ color
-                let green' = eight_bit_to_five_bit . _tga_green $ color
-                let blue' = eight_bit_to_five_bit . _tga_blue $ color
+                let red' = eight_bit_to_five_bit . _red $ color
+                let green' = eight_bit_to_five_bit . _green $ color
+                let blue' = eight_bit_to_five_bit . _blue $ color
 
                 let output = red' + (green' `shiftL` 5) + (blue' `shiftL` 10)
                 putWord16le output
             put_color 16 color = do
-                let red' = eight_bit_to_five_bit . _tga_red $ color
-                let green' = eight_bit_to_five_bit . _tga_green $ color
-                let blue' = eight_bit_to_five_bit . _tga_blue $ color
-                let alpha' = if _tga_alpha color >= 128 then 1 else 0
+                let red' = eight_bit_to_five_bit . _red $ color
+                let green' = eight_bit_to_five_bit . _green $ color
+                let blue' = eight_bit_to_five_bit . _blue $ color
+                let alpha' = if _alpha color >= 128 then 1 else 0
 
                 let output = red' + (green' `shiftL` 5) + (blue' `shiftL` 10) + (alpha' `shiftL` 15)
                 putWord16le output
             put_color 24 color = do
-                putWord8 . _tga_blue $ color
-                putWord8 . _tga_green $ color
-                putWord8 . _tga_red $ color
+                putWord8 . _blue $ color
+                putWord8 . _green $ color
+                putWord8 . _red $ color
             put_color 32 color = do
-                putWord8 . _tga_blue $ color
-                putWord8 . _tga_green $ color
-                putWord8 . _tga_red $ color
-                putWord8 . _tga_alpha $ color
+                putWord8 . _blue $ color
+                putWord8 . _green $ color
+                putWord8 . _red $ color
+                putWord8 . _alpha $ color
             put_color n _ = fail "Unsupported pixel format."
 
             put_image_data :: Word8 -> TGAImageData -> Put
@@ -293,4 +283,3 @@ instance Binary TGAImage where
 makeLenses ''TGAHeader
 makeLenses ''TGAImageDescriptor
 makeLenses ''TGAImage
-makeLenses ''TGAColor

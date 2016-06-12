@@ -33,7 +33,7 @@ module Image.TGA (
 
 import Control.Lens
 import Control.Monad
-import Data.Array
+import qualified Data.Vector as V
 import Data.Bits
 import Data.Int
 import Data.Word
@@ -167,7 +167,7 @@ write_tga :: FilePath -> TGAImage -> IO ()
 write_tga = encodeFile
 
 
-type TGAColorMap = Array Int RGBColor
+type TGAColorMap = V.Vector RGBColor
 type TGAColorMapIndex = Word8 -- At least for the files I'm looking at
 
 data TGAImageData = TGAIndexedData [TGAColorMapIndex] | TGAUnmappedData [RGBColor] deriving (Show, Eq)
@@ -177,7 +177,7 @@ instance Binary TGAImage where
     get = do
         _tga_header' <- get
 
-        color_map <- liftM (listArray (0, (fromIntegral . fromLE . _tga_color_map_length $ _tga_header') - 1)) $ if _tga_has_color_map _tga_header'
+        color_map <- liftM V.fromList $ if _tga_has_color_map _tga_header'
                             then do
                                 skip $ fromIntegral . fromLE . _tga_color_map_offset $ _tga_header'
                                 replicateM (fromIntegral . fromLE . _tga_color_map_length $ _tga_header') $ get_color $ _tga_color_map_depth $ _tga_header'

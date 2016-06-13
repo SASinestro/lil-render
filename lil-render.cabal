@@ -24,6 +24,7 @@ executable lil-render
                     , bytestring   >= 0.10.6  && < 0.11
                     , vector       >= 0.11.0  && < 0.12
                     , lens         >= 4.13    && < 4.14
+                    , primitive    >= 0.6.1   && < 0.7
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances

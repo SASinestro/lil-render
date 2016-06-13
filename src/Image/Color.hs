@@ -12,6 +12,6 @@ data RGBColor = RGBColor {
 } deriving (Eq)
 
 instance Show RGBColor where
-    show color = printf "RGBColor (#%02X%02X%02X, %02f)" (_red color) (_green color) (_blue color) ((fromIntegral $ _alpha color) / 255 :: Double)
+    show color = printf "(#%02X%02X%02X, %02f)" (_red color) (_green color) (_blue color) ((fromIntegral $ _alpha color) / 255 :: Double)
 
 makeLenses ''RGBColor

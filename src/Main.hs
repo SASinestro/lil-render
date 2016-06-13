@@ -1,16 +1,22 @@
 module Main where
 
 import Image
-import Image.Color
+import Image.Mutable
 
-red_color = RGBColor {
-      _red = 255
-    , _green = 0
-    , _blue = 0
-    , _alpha = 255
-}
+import Image.Color
+import qualified Image.NamedColors as NC
+
+import Image.Drawing.Primitives
+
+import Control.Monad
+
 
 main :: IO ()
 main = do
-    let image = make_image 50 50 red_color
-    write_image TGA "red.tga" image
+    image <- thawImage $ make_image 100 100 NC.black
+
+    drawLine image (13, 20) (80, 40) NC.white
+
+    image' <- freezeImage image
+
+    write_image TGA "image.tga" image'

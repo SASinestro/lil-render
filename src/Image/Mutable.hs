@@ -24,7 +24,7 @@ img <!!> (x, y) = do
     MV.read stor (idx x y)
         where
             w = _mWidth img
-            idx x' y' = w * y + x
+            idx x' y' = w * y' + x'
 
 thawImage :: PrimMonad m => Image -> m (MutableImage (PrimState m))
 thawImage img = do
@@ -43,4 +43,4 @@ drawPixel img color (x, y) = do
     MV.write stor (idx x y) color
         where
             w = _mWidth img
-            idx x' y' = w * y + x
+            idx x' y' = w * y'+ x'

@@ -1,4 +1,4 @@
-module Image.Mutable (MutableImage(..), ZBufferIndexType, thawImage, freezeImage, drawPixel, drawPixelWithAlpha) where
+module Image.Mutable (MutableImage(..), ZBufferIndexType, thawImage, freezeImage, drawPixel) where
 
 import           Data.Vector             ((!))
 import qualified Data.Vector             as V
@@ -36,15 +36,6 @@ drawPixel img color (x, y, z) = do
     let stor = _mStorage img
     (_, oldZ) <- MV.read stor (idx x y)
     when (oldZ < z) $ MV.write stor (idx x y) (color, z)
-        where
-            w = _mWidth img
-            idx x' y' = w * y'+ x'
-
-drawPixelWithAlpha :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ZBufferIndexType -> m ()
-drawPixelWithAlpha img new (x, y, z) = do
-    let stor = _mStorage img
-    (current, oldZ) <- MV.read stor (idx x y)
-    when (oldZ < z) $ MV.write stor (idx x y) (blendColor current new, z)
         where
             w = _mWidth img
             idx x' y' = w * y'+ x'

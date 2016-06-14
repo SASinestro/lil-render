@@ -9,7 +9,7 @@ import qualified Data.Text            as T
 import           Math.Vector
 import           Model
 
-data UnresolvedFace = UnresolvedFace [(Int, Maybe Int, Maybe Int)] deriving (Eq, Show)
+data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 
 vertexParser :: Parser Vertex
 vertexParser = do
@@ -30,10 +30,8 @@ textureCoordParser = do
     x <- double
     skipSpace
     y <- double
-    skipSpace
-    z <- double
     skipWhile $ not . isEndOfLine
-    return $ Vector3 x y z
+    return $ Vector2 x y
 
 vertexNormalParser :: Parser VertexNormal
 vertexNormalParser = do
@@ -53,7 +51,7 @@ faceParser = do
     skipSpace
     recs <- (vertTextNormal <|> vertNormal <|> vertText <|> vertOnly) `sepBy` space
     skipWhile $ not . isEndOfLine
-    return $ UnresolvedFace recs
+    return $ UnresolvedFace (recs !! 0) (recs !! 1) (recs !! 2)
 
     where
         vertOnly = do
@@ -90,9 +88,14 @@ vertexNormals = rights . map (parseOnly vertexNormalParser) . filter (("vn" ==) 
 unresolvedFaces :: [T.Text] -> [UnresolvedFace]
 unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.take 2)
 
-faceResolver :: [Vertex] -> [TextureCoordinate] -> [VertexNormal] -> [UnresolvedFace] -> [Face]
-faceResolver vert []   []   = fmap (\(UnresolvedFace xs) -> foldr (\(v, _, _) l -> FaceItem ( vert !! (v - 1) ) Nothing Nothing : l) [] xs)
-faceResolver vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem ( vert !! (v - 1) ) ( (text !!) . (+ (-1)) <$> t ) ( (norm !!) . (+ (-1)) <$> n ) : l) [] xs)
+faceResolver vert text norm = fmap faceResolver'
+        where
+        faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (FaceItem (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
+                                                                                      (FaceItem (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
+                                                                                      (FaceItem (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
+
+        lookup list idx1 = list !! (idx1 - 1)
+        flookup list idx1 = (list !!) . (-) 1 <$> idx1
 
 loadWavefrontObj :: FilePath -> IO Model
 loadWavefrontObj path = do

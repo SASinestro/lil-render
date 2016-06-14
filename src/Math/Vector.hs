@@ -1,4 +1,6 @@
-module Math.Vector where
+module Math.Vector (Vector2(..), Vector3(..), crossVect, Vector4, VectorMath, v2_x, v2_y, v3_x, v3_y, v3_z) where
+
+import Control.Lens
 
 data Vector2 a = Vector2 {
       _v2_x :: a
@@ -20,6 +22,9 @@ data Vector4 a = Vector4 {
     , _v4_z :: a
     , _v4_w :: a
 } deriving (Show, Eq, Functor)
+
+makeLenses ''Vector2
+makeLenses ''Vector3
 
 class VectorMath v a where
     addVect   :: v a -> v a -> v a

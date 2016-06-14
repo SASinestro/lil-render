@@ -1,4 +1,4 @@
-module Image (Image(..), ImageIndexType, (<!>), storage, width, height, ImageFormat(..), read_image, write_image, make_image, ImageConvertible) where
+module Image (Image(..), ImageIndexType, (<!>), storage, width, height, ImageFormat(..), readImage, writeImage, makeImage, ImageConvertible) where
 
 import Image.TGA
 import Image.Color
@@ -20,13 +20,13 @@ data Image = Image {
 } deriving (Eq)
 
 (<!>) :: Image -> ImageIndexType -> RGBColor
-img <!> (x, y) = (_storage img) ! (w * y + x)
+img <!> (x, y) = _storage img ! (w * y + x)
                 where
                     w = _width img
                     h = _height img
 
 instance Show Image where
-    show img = foldl (++) header $ fmap line $ grid w h
+    show img = foldl (++) header $ line <$> grid w h
         where
             grid :: Int -> Int -> [[ ImageIndexType ]]
             grid x y = fmap range [ ( (i, 0), (i, y - 1) ) | i <- [0 .. x - 1]]
@@ -34,10 +34,10 @@ instance Show Image where
             w = _width img
             h = _height img
 
-            header = "Image (" ++ (show w) ++ "x" ++ (show h) ++ ")\n"
+            header = "Image (" ++ show w ++ "x" ++ show h ++ ")\n"
 
             line :: [ ImageIndexType ] -> String
-            line (idx:idxs) = (foldl (\accum x -> accum ++ " " ++ (show $ img <!> x)) ("    " ++ (show $ img <!> idx)) idxs) ++ "\n"
+            line (idx:idxs) = foldl (\accum x -> accum ++ " " ++ show (img <!> x)) ("    " ++ show (img <!> idx)) idxs ++ "\n"
 
 makeLenses ''Image
 
@@ -48,14 +48,14 @@ class ImageConvertible a where
 
 data ImageFormat = TGA
 
-read_image :: ImageFormat -> FilePath -> IO Image
-read_image TGA path = liftM toImage $ read_tga path
+readImage :: ImageFormat -> FilePath -> IO Image
+readImage TGA path = liftM toImage $ read_tga path
 
-write_image :: ImageFormat -> FilePath -> Image -> IO ()
-write_image TGA path img = write_tga path $ fromImage img
+writeImage :: ImageFormat -> FilePath -> Image -> IO ()
+writeImage TGA path img = write_tga path $ fromImage img
 
-make_image :: Int -> Int -> RGBColor -> Image
-make_image width height color = Image {
+makeImage :: Int -> Int -> RGBColor -> Image
+makeImage width height color = Image {
       _storage = V.replicate (width * height) color
     , _width = width
     , _height = height
@@ -74,5 +74,5 @@ instance ImageConvertible TGAImage where
     fromImage image = TGAImage {
           _tga_header = simple_tga_header (_width image) (_height image)
         , _tga_color_map = V.empty
-        , _tga_image_data = TGAUnmappedData $ (V.toList $ _storage image)
+        , _tga_image_data = TGAUnmappedData $ V.toList (_storage image)
     }

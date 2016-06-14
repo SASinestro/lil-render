@@ -7,9 +7,9 @@ import Image (ImageIndexType)
 import Image.Color
 import Image.Mutable
 
-drawLine :: (PrimMonad m) => MutableImage (PrimState m) -> ImageIndexType -> ImageIndexType -> RGBColor -> m ()
-drawLine img (x0, y0) (x1, y1) color
-    | x0 > x1 = drawLine img (x1, y1) (x0, y0) color
+drawLine :: (PrimMonad m) => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> ImageIndexType -> m ()
+drawLine img color (x0, y0) (x1, y1)
+    | x0 > x1 = drawLine img color (x1, y1) (x0, y0)
     | abs (x0 - x1) < abs (y0 - y1) = mapM_ (drawPixel img color) $ transpose <$> drawLine' (y0, x0) (y1, x1)
     | otherwise = mapM_ (drawPixel img color) $ drawLine' (x0, y0) (x1, y1)
     where

@@ -7,11 +7,12 @@ import Data.Attoparsec.Text
 import qualified Data.Text as T
 
 import Model
+import Math.Vector
 
 data UnresolvedFace = UnresolvedFace [(Int, Maybe Int, Maybe Int)] deriving (Eq, Show)
 
-vertex :: Parser Vertex
-vertex = do
+vertexParser :: Parser Vertex
+vertexParser = do
     char 'v'
     skipSpace
     x <- double
@@ -22,8 +23,8 @@ vertex = do
     skipWhile $ not . isEndOfLine
     return $ Vector3 x y z
 
-textureCoord :: Parser TextureCoordinate
-textureCoord = do
+textureCoordParser :: Parser TextureCoordinate
+textureCoordParser = do
     string "vt"
     skipSpace
     x <- double
@@ -34,8 +35,8 @@ textureCoord = do
     skipWhile $ not . isEndOfLine
     return $ Vector3 x y z
 
-vertexNormal :: Parser VertexNormal
-vertexNormal = do
+vertexNormalParser :: Parser VertexNormal
+vertexNormalParser = do
     string "vn"
     skipSpace
     x <- double
@@ -46,8 +47,8 @@ vertexNormal = do
     skipWhile $ not . isEndOfLine
     return $ Vector3 x y z
 
-face :: Parser UnresolvedFace
-face = do
+faceParser :: Parser UnresolvedFace
+faceParser = do
     char 'f'
     skipSpace
     recs <- (vertOnly <|> vertText <|> vertNormal <|> vertTextNormal) `sepBy` space
@@ -79,19 +80,19 @@ face = do
             return (vert, Just text, Just norm)
 
 vertices :: [T.Text] -> [Vertex]
-vertices = rights . map (parseOnly vertex) . filter (("v " ==) . T.take 2)
+vertices = rights . map (parseOnly vertexParser) . filter (("v " ==) . T.take 2)
 
 textureCoords :: [T.Text] -> [TextureCoordinate]
-textureCoords = rights . map (parseOnly textureCoord) . filter (("vt" ==) . T.take 2)
+textureCoords = rights . map (parseOnly textureCoordParser) . filter (("vt" ==) . T.take 2)
 
 vertexNormals :: [T.Text] -> [VertexNormal]
-vertexNormals = rights . map (parseOnly vertexNormal) . filter (("vn" ==) . T.take 2)
+vertexNormals = rights . map (parseOnly vertexNormalParser) . filter (("vn" ==) . T.take 2)
 
 unresolvedFaces :: [T.Text] -> [UnresolvedFace]
-unresolvedFaces = rights . map (parseOnly face) . filter (("f " ==) . T.take 2)
+unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.take 2)
 
-faces :: [Vertex] -> [TextureCoordinate] -> [VertexNormal] -> [UnresolvedFace] -> [Face]
-faces vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem (vert !! v) ((text !!) <$> t) ((norm !!) <$> n) : l) [] xs)
+faceResolver :: [Vertex] -> [TextureCoordinate] -> [VertexNormal] -> [UnresolvedFace] -> [Face]
+faceResolver vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem (vert !! v) ((text !!) <$> t) ((norm !!) <$> n) : l) [] xs)
 
 loadWavefrontObj :: FilePath -> IO Model
 loadWavefrontObj path = do
@@ -103,4 +104,4 @@ loadWavefrontObj path = do
     let n = vertexNormals ls
     let u = unresolvedFaces ls
 
-    return . Model $ faces v t n u
+    return . Model $ faceResolver v t n u

@@ -1,4 +1,4 @@
-module Model (Vertex, TextureCoordinate, VertexNormal, FaceItem(..), Face, Model, vertex, textureCoordinate, vertexNormal, faces) where
+module Model (Vertex, TextureCoordinate, VertexNormal, FaceItem(..), Face, Model(..), vertex, textureCoordinate, vertexNormal, faces) where
 
 import Math.Vector
 import Control.Lens

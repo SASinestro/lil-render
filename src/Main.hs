@@ -13,10 +13,10 @@ import Control.Monad
 
 main :: IO ()
 main = do
-    image <- thawImage $ make_image 100 100 NC.black
+    image <- thawImage $ makeImage 100 100 NC.black
 
-    drawLine image (13, 20) (80, 40) NC.white
+    drawLine image NC.white (13, 20) (80, 40)
 
     image' <- freezeImage image
 
-    write_image TGA "image.tga" image'
+    writeImage TGA "image.tga" image'

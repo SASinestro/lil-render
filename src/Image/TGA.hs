@@ -31,18 +31,18 @@ module Image.TGA (
     , tga_image_data
 ) where
 
-import Control.Lens
-import Control.Monad
-import qualified Data.Vector as V
-import Data.Bits
-import Data.Int
-import Data.Word
-import Image.Color
-import GHC.Generics
+import           Control.Lens
+import           Control.Monad
+import           Data.Bits
+import           Data.Int
+import qualified Data.Vector     as V
+import           Data.Word
+import           GHC.Generics
+import           Image.Color
 
-import Data.Binary
-import Data.Binary.Get
-import Data.Binary.Put
+import           Data.Binary
+import           Data.Binary.Get
+import           Data.Binary.Put
 
 
 getInt16le = liftM (fromIntegral :: Word16 -> Int16) getWord16le
@@ -129,8 +129,8 @@ data TGADataStorage = TGANonInterleaved
 
 data TGAImageDescriptor = TGAImageDescriptor {
       _tga_attribute_bits_per_pixel :: Word8
-    , _tga_screen_origin :: TGAOrigin
-    , _tga_data_storage :: TGADataStorage
+    , _tga_screen_origin            :: TGAOrigin
+    , _tga_data_storage             :: TGADataStorage
 } deriving (Show, Eq)
 
 instance Binary TGADataStorage

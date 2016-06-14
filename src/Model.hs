@@ -1,16 +1,16 @@
 module Model (Vertex, TextureCoordinate, VertexNormal, FaceItem(..), Face, Model(..), vertex, textureCoordinate, vertexNormal, faces) where
 
-import Math.Vector
 import Control.Lens
+import Math.Vector
 
 type Vertex = Vector3 Double
 type TextureCoordinate = Vector3 Double
 type VertexNormal = Vector3 Double
 
 data FaceItem = FaceItem {
-        _vertex :: Vertex
+        _vertex            :: Vertex
       , _textureCoordinate :: Maybe TextureCoordinate
-      , _vertexNormal :: Maybe VertexNormal
+      , _vertexNormal      :: Maybe VertexNormal
 } deriving (Eq, Show)
 
 type Face = [FaceItem]

@@ -4,9 +4,9 @@ import Control.Monad
 import Control.Monad.Primitive
 
 import Image
-import Image.Mutable
 import Image.Color
 import Image.Drawing.Primitives
+import Image.Mutable
 import Math.Vector
 import Model
 

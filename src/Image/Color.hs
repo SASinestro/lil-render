@@ -5,9 +5,9 @@ import Data.Word
 import Text.Printf
 
 data RGBColor = RGBColor {
-      _red :: Word8
+      _red   :: Word8
     , _green :: Word8
-    , _blue :: Word8
+    , _blue  :: Word8
     , _alpha :: Word8
 } deriving (Eq)
 

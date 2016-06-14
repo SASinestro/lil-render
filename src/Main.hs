@@ -1,22 +1,18 @@
 module Main where
 
-import Image
-import Image.Mutable
-
-import Image.Color
 import qualified Image.NamedColors as NC
 
-import Image.Drawing.Primitives
-
-import Control.Monad
-
+import Image
+import Model
+import Model.Wavefront
+import Renderer.Wireframe
 
 main :: IO ()
 main = do
-    image <- thawImage $ makeImage 100 100 NC.black
+    model <- loadWavefrontObj "african_head.obj"
 
-    drawLine image NC.white (13, 20) (80, 40)
+    image <- wireframeImage model 800 800 NC.black NC.white
 
-    image' <- freezeImage image
+    writeImage TGA "head.tga" image
 
-    writeImage TGA "image.tga" image'
+    putStrLn "Wakka wakka!"

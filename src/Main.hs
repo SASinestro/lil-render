@@ -18,7 +18,7 @@ main = do
 
     let lightingDirection = Vector3 0 0 (-1) :: Vector3 Double
 
-    drawFlatShadedModel image model (\normal -> return $ RGBColor 255 255 255 (max 0 $ round (255 * dotVect normal lightingDirection)))
+    drawFlatShadedModel image model (\normal -> return $ NC.white `scaleColor` dotVect normal lightingDirection)
 
     image' <- freezeImage image
 

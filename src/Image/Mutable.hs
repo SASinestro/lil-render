@@ -1,4 +1,4 @@
-module Image.Mutable (MutableImage, (<!!>), thawImage, freezeImage, drawPixel) where
+module Image.Mutable (MutableImage(..), (<!!>), thawImage, freezeImage, drawPixel) where
 
 import           Data.Vector             ((!))
 import qualified Data.Vector             as V

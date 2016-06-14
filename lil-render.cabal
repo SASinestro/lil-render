@@ -21,12 +21,18 @@ executable lil-render
                     , Image.Color
                     , Image.NamedColors
                     , Image.TGA
+                    , Model
+                    , Model.Wavefront
+                    , Math.Vector
   build-depends:      base         >= 4.7     && < 5
                     , binary       >= 0.7.5   && < 0.8
                     , bytestring   >= 0.10.6  && < 0.11
                     , vector       >= 0.11.0  && < 0.12
                     , lens         >= 4.13    && < 4.14
                     , primitive    >= 0.6.1   && < 0.7
+                    , reflection   >= 2.1     && < 2.2
+                    , attoparsec   >= 0.13.0  && < 0.14
+                    , text         >= 1.2.2   && < 1.3
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
@@ -42,6 +48,8 @@ executable lil-render
                       , KindSignatures
                       , ScopedTypeVariables
                       , RankNTypes
+                      , MultiParamTypeClasses
+                      , OverloadedStrings
 
   hs-source-dirs:     src
   default-language:   Haskell2010

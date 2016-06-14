@@ -92,7 +92,7 @@ unresolvedFaces :: [T.Text] -> [UnresolvedFace]
 unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.take 2)
 
 faceResolver :: [Vertex] -> [TextureCoordinate] -> [VertexNormal] -> [UnresolvedFace] -> [Face]
-faceResolver vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem (vert !! v) ((text !!) <$> t) ((norm !!) <$> n) : l) [] xs)
+faceResolver vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem ( vert !! (v - 1) ) ( (text !!) . (+ (-1)) <$> t ) ( (norm !!) . (+ (-1)) <$> n ) : l) [] xs)
 
 loadWavefrontObj :: FilePath -> IO Model
 loadWavefrontObj path = do

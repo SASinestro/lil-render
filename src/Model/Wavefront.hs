@@ -1,4 +1,4 @@
-module Model.Wavefront (loadWavefrontObj) where
+module Model.Wavefront where
 
 import           Control.Applicative
 import           Control.Monad
@@ -51,20 +51,19 @@ faceParser :: Parser UnresolvedFace
 faceParser = do
     char 'f'
     skipSpace
-    recs <- (vertOnly <|> vertText <|> vertNormal <|> vertTextNormal) `sepBy` space
+    recs <- (vertTextNormal <|> vertNormal <|> vertText <|> vertOnly) `sepBy` space
     skipWhile $ not . isEndOfLine
     return $ UnresolvedFace recs
 
     where
         vertOnly = do
             vert <- signed decimal
-            space
+
             return (vert, Nothing, Nothing)
         vertText = do
             vert <- signed decimal
             char '/'
             text <- signed decimal
-            space
             return (vert, Just text, Nothing)
         vertNormal = do
             vert <- signed decimal
@@ -92,6 +91,7 @@ unresolvedFaces :: [T.Text] -> [UnresolvedFace]
 unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.take 2)
 
 faceResolver :: [Vertex] -> [TextureCoordinate] -> [VertexNormal] -> [UnresolvedFace] -> [Face]
+faceResolver vert []   []   = fmap (\(UnresolvedFace xs) -> foldr (\(v, _, _) l -> FaceItem ( vert !! (v - 1) ) Nothing Nothing : l) [] xs)
 faceResolver vert text norm = fmap (\(UnresolvedFace xs) -> foldr (\(v, t, n) l -> FaceItem ( vert !! (v - 1) ) ( (text !!) . (+ (-1)) <$> t ) ( (norm !!) . (+ (-1)) <$> n ) : l) [] xs)
 
 loadWavefrontObj :: FilePath -> IO Model

@@ -1,4 +1,4 @@
-module Image.Mutable (MutableImage(..), (<!!>), thawImage, freezeImage, drawPixel, drawPixelWithAlpha) where
+module Image.Mutable (MutableImage(..), ZBufferIndexType, thawImage, freezeImage, drawPixel, drawPixelWithAlpha) where
 
 import           Data.Vector             ((!))
 import qualified Data.Vector             as V
@@ -12,46 +12,39 @@ import           Control.Monad.ST
 import           Image
 import           Image.Color
 
+type ZBufferIndexType = (Int, Int, Double)
+
 data MutableImage s = MutableImage {
-      _mStorage :: V.MVector s RGBColor
+      _mStorage :: V.MVector s (RGBColor, Double)
     , _mWidth   :: Int
     , _mHeight  :: Int
     }
 
-(<!!>) :: (PrimMonad m) => MutableImage (PrimState m) -> ImageIndexType -> m RGBColor
-img <!!> (x, y) = do
-    let stor = _mStorage img
-    MV.read stor (idx x y)
-        where
-            w = _mWidth img
-            idx x' y' = w * y' + x'
-
 thawImage :: PrimMonad m => Image -> m (MutableImage (PrimState m))
 thawImage img = do
-    stor <- V.thaw $ _storage img
+    stor <- V.thaw . V.map (\c -> (c, 0)) $ _storage img
     return $ MutableImage stor (_width img) (_height img)
 
 freezeImage :: PrimMonad m => MutableImage (PrimState m) -> m Image
 freezeImage img = do
     let stor' = _mStorage img
     stor  <- V.freeze stor'
-    return $ Image stor (_mWidth img) (_mHeight img)
+    return $ Image (V.map fst stor) (_mWidth img) (_mHeight img)
 
-drawPixel :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> m ()
-drawPixel img color (x, y) = do
+drawPixel :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ZBufferIndexType -> m ()
+drawPixel img color (x, y, z) = do
     let stor = _mStorage img
-    MV.write stor (idx x y) color
+    (_, oldZ) <- MV.read stor (idx x y)
+    when (oldZ < z) $ MV.write stor (idx x y) (color, z)
         where
             w = _mWidth img
             idx x' y' = w * y'+ x'
 
-drawPixelWithAlpha :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> m ()
-drawPixelWithAlpha img new (x, y) = do
+drawPixelWithAlpha :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ZBufferIndexType -> m ()
+drawPixelWithAlpha img new (x, y, z) = do
     let stor = _mStorage img
-
-    current <- MV.read stor (idx x y)
-
-    MV.write stor (idx x y) $ blendColor current new
+    (current, oldZ) <- MV.read stor (idx x y)
+    when (oldZ < z) $ MV.write stor (idx x y) (blendColor current new, z)
         where
             w = _mWidth img
             idx x' y' = w * y'+ x'

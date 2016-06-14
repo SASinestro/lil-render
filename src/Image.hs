@@ -1,22 +1,22 @@
 module Image (Image(..), ImageIndexType, (<!>), storage, width, height, ImageFormat(..), readImage, writeImage, makeImage, ImageConvertible) where
 
-import Image.TGA
-import Image.Color
+import           Image.Color
+import           Image.TGA
 
-import Control.Monad
-import Control.Lens
-import Data.Vector ((!))
-import qualified Data.Vector as V
-import Data.Foldable
-import Data.Ix
+import           Control.Lens
+import           Control.Monad
+import           Data.Foldable
+import           Data.Ix
+import           Data.Vector   ((!))
+import qualified Data.Vector   as V
 
 type ImageIndexType = (Int, Int)
 
 
 data Image = Image {
       _storage :: V.Vector RGBColor
-    , _width :: Int
-    , _height :: Int
+    , _width   :: Int
+    , _height  :: Int
 } deriving (Eq)
 
 (<!>) :: Image -> ImageIndexType -> RGBColor

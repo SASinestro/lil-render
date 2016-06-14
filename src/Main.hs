@@ -1,11 +1,11 @@
 module Main where
 
-import qualified Image.NamedColors as NC
+import qualified Image.NamedColors  as NC
 
-import Image
-import Model
-import Model.Wavefront
-import Renderer.Wireframe
+import           Image
+import           Model
+import           Model.Wavefront
+import           Renderer.Wireframe
 
 main :: IO ()
 main = do

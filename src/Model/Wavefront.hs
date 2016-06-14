@@ -1,13 +1,13 @@
 module Model.Wavefront (loadWavefrontObj) where
 
-import Control.Applicative
-import Data.Either
-import Control.Monad
-import Data.Attoparsec.Text
-import qualified Data.Text as T
+import           Control.Applicative
+import           Control.Monad
+import           Data.Attoparsec.Text
+import           Data.Either
+import qualified Data.Text            as T
 
-import Model
-import Math.Vector
+import           Math.Vector
+import           Model
 
 data UnresolvedFace = UnresolvedFace [(Int, Maybe Int, Maybe Int)] deriving (Eq, Show)
 

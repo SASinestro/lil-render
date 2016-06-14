@@ -1,11 +1,11 @@
 module Image.Drawing.Primitives (drawLine, drawLine') where
 
-import           Control.Monad
-import           Control.Monad.Primitive
+import Control.Monad
+import Control.Monad.Primitive
 
-import           Image                   (ImageIndexType)
-import           Image.Color
-import           Image.Mutable
+import Image                   (ImageIndexType)
+import Image.Color
+import Image.Mutable
 
 drawLine :: (PrimMonad m) => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> ImageIndexType -> m ()
 drawLine img color (x0, y0) (x1, y1)

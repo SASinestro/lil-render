@@ -1,21 +1,21 @@
 module Image.Mutable (MutableImage, (<!!>), thawImage, freezeImage, drawPixel) where
 
-import Data.Vector ((!))
-import qualified Data.Vector         as V
-import qualified Data.Vector.Mutable as MV
+import           Data.Vector             ((!))
+import qualified Data.Vector             as V
+import qualified Data.Vector.Mutable     as MV
 
-import Control.Lens
-import Control.Monad
-import Control.Monad.Primitive
-import Control.Monad.ST
+import           Control.Lens
+import           Control.Monad
+import           Control.Monad.Primitive
+import           Control.Monad.ST
 
-import Image
-import Image.Color
+import           Image
+import           Image.Color
 
 data MutableImage s = MutableImage {
       _mStorage :: V.MVector s RGBColor
-    , _mWidth :: Int
-    , _mHeight :: Int
+    , _mWidth   :: Int
+    , _mHeight  :: Int
     }
 
 (<!!>) :: (PrimMonad m) => MutableImage (PrimState m) -> ImageIndexType -> m RGBColor

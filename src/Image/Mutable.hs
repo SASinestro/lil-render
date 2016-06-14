@@ -1,4 +1,4 @@
-module Image.Mutable (MutableImage(..), (<!!>), thawImage, freezeImage, drawPixel) where
+module Image.Mutable (MutableImage(..), (<!!>), thawImage, freezeImage, drawPixel, drawPixelWithAlpha) where
 
 import           Data.Vector             ((!))
 import qualified Data.Vector             as V
@@ -41,6 +41,17 @@ drawPixel :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ImageIndex
 drawPixel img color (x, y) = do
     let stor = _mStorage img
     MV.write stor (idx x y) color
+        where
+            w = _mWidth img
+            idx x' y' = w * y'+ x'
+
+drawPixelWithAlpha :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> m ()
+drawPixelWithAlpha img new (x, y) = do
+    let stor = _mStorage img
+
+    current <- MV.read stor (idx x y)
+
+    MV.write stor (idx x y) $ blendColor current new
         where
             w = _mWidth img
             idx x' y' = w * y'+ x'

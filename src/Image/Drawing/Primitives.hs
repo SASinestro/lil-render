@@ -11,8 +11,8 @@ import Math.Vector
 
 drawLine :: (PrimMonad m) => MutableImage (PrimState m) -> RGBColor -> ImageIndexType -> ImageIndexType -> m ()
 drawLine img color (x0, y0) (x1, y1)
-    | abs (x0 - x1) < abs (y0 - y1) = mapM_ (drawPixel img color) $ transpose <$> drawLine' (y0, x0) (y1, x1)
-    | otherwise = mapM_ (drawPixel img color) $ drawLine' (x0, y0) (x1, y1)
+    | abs (x0 - x1) < abs (y0 - y1) = mapM_ (drawPixelWithAlpha img color) $ transpose <$> drawLine' (y0, x0) (y1, x1)
+    | otherwise = mapM_ (drawPixelWithAlpha img color) $ drawLine' (x0, y0) (x1, y1)
     where
         transpose :: (a, b) -> (b, a)
         transpose (a, b) = (b, a)
@@ -44,7 +44,7 @@ drawTriangle img color (v1, v2, v3) = do
 drawFilledTriangle :: (PrimMonad m) => MutableImage (PrimState m) -> RGBColor
                       -> (ImageIndexType, ImageIndexType, ImageIndexType) -> m ()
 drawFilledTriangle img color ((v1x, v1y), (v2x, v2y), (v3x, v3y)) =
-    mapM_ (drawPixel img color) [(i, j) | i <- [minX .. maxX], j <- [minY .. maxY], isInTriangle (i, j)]
+    mapM_ (drawPixelWithAlpha img color) [(i, j) | i <- [minX .. maxX], j <- [minY .. maxY], isInTriangle (i, j)]
     where
         minX = max 0                  $ minimum [v1x, v2x, v3x]
         maxX = min (_mWidth img - 1)  $ maximum [v1x, v2x, v3x]

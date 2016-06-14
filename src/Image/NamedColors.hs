@@ -3,6 +3,7 @@ module Image.NamedColors where
 import Image.Color
 
 aliceBlue = RGBColor 240 248 255 255
+alpha = RGBColor 0 0 0 0
 antiqueWhite = RGBColor 250 235 215 255
 aquamarine = RGBColor 127 255 212 255
 azure = RGBColor 240 255 255 255

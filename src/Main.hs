@@ -2,25 +2,28 @@ module Main where
 
 import qualified Image.NamedColors        as NC
 
+import           Control.Monad.Random
 import           Image
+import           Image.Color
 import           Image.Drawing.Primitives
 import           Image.Mutable
 import           Math.Vector
+import           Model.Wavefront
+import           Renderer
+
+import Debug.Trace
 
 main :: IO ()
 main = do
-    image <- thawImage $ makeImage 200 200 NC.black
+    image <- thawImage $ makeImage 1600 1600 NC.black
+    model <- loadWavefrontObj "african_head.obj"
 
-    let t1 = (( 10,  70), ( 50, 160), (70,   80))
-    let t2 = ((180,  50), (150,   1), (70,  180))
-    let t3 = ((180, 150), (120, 160), (130, 180))
+    let lightingDirection = Vector3 0 0 (-1) :: Vector3 Double
 
-    drawFilledTriangle image NC.red t1
-    drawFilledTriangle image NC.white t2
-    drawFilledTriangle image NC.green t3
+    drawFlatShadedModel image model (\normal -> return $ (\a -> traceShow a a) $ RGBColor 255 255 255 (max 0 $ round (255 * dotVect normal lightingDirection)))
 
     image' <- freezeImage image
 
-    writeImage TGA "triangles.tga" image'
+    writeImage TGA "head.tga" image'
 
     putStrLn "Wakka wakka!"

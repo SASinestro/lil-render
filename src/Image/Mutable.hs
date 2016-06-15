@@ -12,10 +12,10 @@ import           Control.Monad.ST
 import           Image
 import           Image.Color
 
-type ZBufferIndexType = (Int, Int, Double)
+type ZBufferIndexType = (Int, Int, Int)
 
 data MutableImage s = MutableImage {
-      _mStorage :: V.MVector s (RGBColor, Double)
+      _mStorage :: V.MVector s (RGBColor, Int)
     , _mWidth   :: Int
     , _mHeight  :: Int
     }

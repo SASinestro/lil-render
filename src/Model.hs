@@ -15,7 +15,6 @@ module Model (
     , faces) where
 
 import Control.Lens
-import Data.MonoTraversable
 import Math.Vector
 
 type VertexPoint = Vector3 Double

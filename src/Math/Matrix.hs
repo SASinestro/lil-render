@@ -56,13 +56,13 @@ matrixFrom2DList lol = Matrix (V.fromList $ concat lol) width height
 identityMatrix :: (Num a) => Int -> Matrix a
 identityMatrix n = matrixFrom2DList [replicate (j - 1) 0 ++ [1] ++ replicate (n - j) 0 | j <- [1 .. n]]
 
-multiplyMat :: (Num a) => Matrix a -> Matrix a -> Matrix a
-multiplyMat a b
+mMult :: (Num a) => Matrix a -> Matrix a -> Matrix a
+mMult a b
     | ay /= bx = error $ "Matrix conformality error: trying to multiply a " ++ show ax ++ "x" ++ show ay
                                                        ++ " matrix with a " ++ show bx ++ "x" ++ show by ++ " matrix."
     | otherwise = Matrix (V.fromList [sum [a `mIndex` (i, k) * (b `mIndex` (k, j)) | k <- [1 .. ay]]
-                                                                                | i <- [1 .. ax],
-                                                                                  j <- [1 .. by]]) ax by
+                                                                                | j <- [1 .. by],
+                                                                                  i <- [1 .. ax]]) ax by
     where
         ax = a ^. mCols
         ay = a ^. mRows

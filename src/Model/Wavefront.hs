@@ -1,4 +1,4 @@
-module Model.Wavefront where
+module Model.Wavefront (loadWavefrontObj) where
 
 import           Control.Applicative
 import           Control.Monad
@@ -7,12 +7,12 @@ import           Data.Either
 import qualified Data.Text            as T
 
 import           Math.Vector
-import           Model
+import           Model                hiding (vertices)
 
 data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 
-vertexParser :: Parser Vertex
-vertexParser = do
+vertexPointParser :: Parser VertexPoint
+vertexPointParser = do
     char 'v'
     skipSpace
     x <- double
@@ -52,11 +52,9 @@ faceParser = do
     recs <- (vertTextNormal <|> vertNormal <|> vertText <|> vertOnly) `sepBy` space
     skipWhile $ not . isEndOfLine
     return $ UnresolvedFace (recs !! 0) (recs !! 1) (recs !! 2)
-
     where
         vertOnly = do
             vert <- signed decimal
-
             return (vert, Nothing, Nothing)
         vertText = do
             vert <- signed decimal
@@ -76,8 +74,8 @@ faceParser = do
             norm <- signed decimal
             return (vert, Just text, Just norm)
 
-vertices :: [T.Text] -> [Vertex]
-vertices = rights . map (parseOnly vertexParser) . filter (("v " ==) . T.take 2)
+vertices :: [T.Text] -> [VertexPoint]
+vertices = rights . map (parseOnly vertexPointParser) . filter (("v " ==) . T.take 2)
 
 textureCoords :: [T.Text] -> [TextureCoordinate]
 textureCoords = rights . map (parseOnly textureCoordParser) . filter (("vt" ==) . T.take 2)
@@ -90,10 +88,9 @@ unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.ta
 
 faceResolver vert text norm = fmap faceResolver'
         where
-        faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (FaceItem (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
-                                                                                      (FaceItem (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
-                                                                                      (FaceItem (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
-
+        faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (Vertex (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
+                                                                                      (Vertex (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
+                                                                                      (Vertex (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
         lookup list idx1 = list !! (idx1 - 1)
         flookup list idx1 = (list !!) . (+ (-1)) <$> idx1
 

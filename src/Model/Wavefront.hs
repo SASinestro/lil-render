@@ -95,7 +95,7 @@ faceResolver vert text norm = fmap faceResolver'
                                                                                       (FaceItem (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
 
         lookup list idx1 = list !! (idx1 - 1)
-        flookup list idx1 = (list !!) . (-) 1 <$> idx1
+        flookup list idx1 = (list !!) . (+ (-1)) <$> idx1
 
 loadWavefrontObj :: FilePath -> IO Model
 loadWavefrontObj path = do

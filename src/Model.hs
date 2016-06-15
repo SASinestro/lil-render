@@ -1,27 +1,45 @@
-module Model (Vertex, TextureCoordinate, VertexNormal, FaceItem(..), Face(..), Model(..), vertex, textureCoordinate, vertexNormal, fstFace, sndFace, trdFace, faces) where
+module Model (
+      VertexPoint
+    , TextureCoordinate
+    , VertexNormal
+    , Vertex(..)
+    , Face(..)
+    , Model(..)
+    , point
+    , textureCoordinate
+    , vertexNormal
+    , firstVertex
+    , secondVertex
+    , thirdVertex
+    , vertices
+    , faces) where
 
 import Control.Lens
+import Data.MonoTraversable
 import Math.Vector
 
-type Vertex = Vector3 Double
+type VertexPoint = Vector3 Double
 type TextureCoordinate = Vector2 Double
 type VertexNormal = Vector3 Double
 
-data FaceItem = FaceItem {
-        _vertex            :: Vertex
+data Vertex = Vertex {
+        _point             :: VertexPoint
       , _textureCoordinate :: Maybe TextureCoordinate
       , _vertexNormal      :: Maybe VertexNormal
 } deriving (Eq, Show)
 
 data Face = Face {
-    _fstFace, _sndFace, _trdFace :: FaceItem
-} deriving (Show, Eq)
+        _firstVertex, _secondVertex, _thirdVertex :: Vertex
+} deriving (Eq, Show)
+
+vertices :: Fold Face Vertex
+vertices = folding (\(Face v1 v2 v3) -> [v1, v2, v3])
 
 data Model = Model {
       _faces :: [Face]
 } deriving (Eq, Show)
 
 
-makeLenses ''FaceItem
+makeLenses ''Vertex
 makeLenses ''Face
 makeLenses ''Model

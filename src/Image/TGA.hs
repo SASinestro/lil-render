@@ -185,7 +185,7 @@ instance Binary TGAImage where
 
         image_data <- if _tga_has_color_map _tga_header'
                             then liftM TGAIndexedData $ replicateM (fromIntegral . fromLE $ _tga_width _tga_header' * _tga_height _tga_header') $ (get :: Get TGAColorMapIndex)
-                            else liftM TGAUnmappedData $ replicateM (fromIntegral . fromLE $ _tga_width _tga_header' * _tga_height _tga_header') $ get_color $ _tga_bit_depth _tga_header'
+                            else liftM TGAUnmappedData $ replicateM ((fromIntegral . fromLE $ _tga_width _tga_header') * (fromIntegral . fromLE $ _tga_height _tga_header')) $ get_color $ _tga_bit_depth _tga_header'
 
         return $ TGAImage _tga_header' color_map image_data
         where

@@ -29,7 +29,7 @@ instance Show Image where
     show img = foldl (++) header $ line <$> grid w h
         where
             grid :: Int -> Int -> [[ ImageIndexType ]]
-            grid x y = fmap range [ ( (i, 0), (i, y - 1) ) | i <- [0 .. x - 1]]
+            grid x y = fmap range [ ( (0, j), (x - 1, j) ) | j <- [0 .. y - 1]]
 
             w = _width img
             h = _height img

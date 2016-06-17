@@ -72,12 +72,11 @@ main = do
     texture <- readImage TGA "data/african_head/african_head_diffuse.tga"
 
     initializeTime
+
     startTime <- getTime
-
-    img' <- drawModel 400 400 model (Texture texture)
-    img <- evaluate . force $ img'
-
+    img <- drawModel 400 400 model (Texture texture)
     endTime <- getTime
+
     putStrLn $ "Frame time: " ++ secs (endTime - startTime)
 
     writeImage TGA "head.tga" img

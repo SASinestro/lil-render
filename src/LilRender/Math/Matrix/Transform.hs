@@ -1,4 +1,4 @@
-module Math.Matrix.Transform (
+module LilRender.Math.Matrix.Transform (
       Transform
     , pointToMatrix
     , matrixTo3DPoint
@@ -11,18 +11,20 @@ module Math.Matrix.Transform (
     , zRotateTransform
 ) where
 
-import Data.Foldable
-import Math.Geometry
-import Math.Matrix
+import           Data.Foldable
+import qualified Data.Vector.Generic     as V
+
+import           LilRender.Math.Geometry
+import           LilRender.Math.Matrix
 
 type Transform = Matrix Double
 
 pointToMatrix :: Point3 Double -> Matrix Double
-pointToMatrix (Point3 a b c) = matrixFrom2DList [[a, b, c, 1]]
+pointToMatrix (Point3 a b c) = Matrix (V.fromList [a, b, c, 1]) 4 1
 
 matrixTo3DPoint :: Matrix Double -> Point3 Double
-matrixTo3DPoint mat
-    | _mCols mat == 4 && _mRows mat == 1 = Point3 (a / d) (b / d) (c / d)
+matrixTo3DPoint mat@(Matrix _ cols rows)
+    | cols == 4 && rows == 1 = Point3 (a / d) (b / d) (c / d)
     | otherwise = error "Non 4x1 matrices cannot be converted into 3D coordinates."
         where
             a = mat `mIndex` (1, 1)
@@ -31,8 +33,8 @@ matrixTo3DPoint mat
             d = mat `mIndex` (4, 1)
 
 transform3DPoint :: Transform -> Point3 Double -> Point3 Double
-transform3DPoint trans
-    | _mCols trans == 4 && _mRows trans == 4 = matrixTo3DPoint . mMult trans . pointToMatrix
+transform3DPoint trans @ (Matrix _ cols rows)
+    | cols == 4 && rows == 4 = matrixTo3DPoint . mMult trans . pointToMatrix
     | otherwise = error "Matrix given is not 4x4, cannot transform 3D point."
 
 viewportTransform :: Point2 Int -> Int -> Int -> Int -> Transform

@@ -1,22 +1,21 @@
-module Renderer where
+module LilRender.Renderer where
 
-import Control.Lens
 import Control.Monad
 import Control.Monad.Primitive
 import Data.Maybe
 
-import Image
-import Image.Color
-import Image.DrawingPrimitives
-import Image.Mutable
-import Image.Texture
+import LilRender.Image
+import LilRender.Image.Color
+import LilRender.Image.DrawingPrimitives
+import LilRender.Image.Mutable
+import LilRender.Image.Texture
 
-import Model
+import LilRender.Model
 
-import Math.Geometry
-import Math.Matrix
-import Math.Matrix.Transform
-import Math.Vector
+import LilRender.Math.Geometry
+import LilRender.Math.Matrix
+import LilRender.Math.Matrix.Transform
+import LilRender.Math.Vector
 
 pointToTextureCoords :: TextureCoordinate -> TextureCoordinate -> TextureCoordinate -> Barycentric (Point3 Double) -> TextureCoordinate
 pointToTextureCoords (TextureCoordinate (Point2 t1x t1y)) (TextureCoordinate (Point2 t2x t2y)) (TextureCoordinate (Point2 t3x t3y)) bary = TextureCoordinate (Point2 x y)

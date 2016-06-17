@@ -1,15 +1,15 @@
-module Model.Wavefront (loadWavefrontObj) where
+module LilRender.Model.Wavefront (loadWavefrontObj) where
 
 import           Control.Applicative
 import           Control.Monad
 import           Data.Attoparsec.Text
 import           Data.Either
-import qualified Data.Text            as T
-import qualified Data.Vector          as V
+import qualified Data.Text               as T
+import qualified Data.Vector             as V
 
-import           Math.Geometry
-import           Math.Vector
-import           Model                hiding (vertices)
+import           LilRender.Math.Geometry
+import           LilRender.Math.Vector
+import           LilRender.Model         hiding (vertices)
 
 data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 

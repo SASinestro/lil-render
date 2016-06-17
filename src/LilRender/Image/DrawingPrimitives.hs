@@ -1,7 +1,6 @@
-module Image.DrawingPrimitives (drawFilledTriangle, Triangle) where
+module LilRender.Image.DrawingPrimitives (drawFilledTriangle, Triangle) where
 
 import Control.Arrow
-import Control.Lens
 import Control.Monad
 import Control.Monad.Primitive
 import Data.Ix
@@ -9,12 +8,12 @@ import Data.List
 import Data.Maybe
 import Data.Ord
 
-import Image
-import Image.Color
-import Image.Mutable
-import Math.Geometry
-import Math.Vector
-import Model
+import LilRender.Image
+import LilRender.Image.Color
+import LilRender.Image.Mutable
+import LilRender.Math.Geometry
+import LilRender.Math.Vector
+import LilRender.Model
 
 
 -- .. for Doubles doesn't really work.

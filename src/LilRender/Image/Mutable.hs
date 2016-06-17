@@ -1,17 +1,16 @@
-module Image.Mutable (MutableImage(..), ZBufferIndexType, thawImage, freezeImage, drawPixel) where
+module LilRender.Image.Mutable (MutableImage(..), ZBufferIndexType, thawImage, freezeImage, drawPixel) where
 
 import           Data.Vector             ((!))
 import qualified Data.Vector             as V
 import qualified Data.Vector.Mutable     as MV
 
-import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Primitive
 import           Control.Monad.ST
 
-import           Image
-import           Image.Color
-import           Math.Geometry
+import           LilRender.Image
+import           LilRender.Image.Color
+import           LilRender.Math.Geometry
 
 type ZBufferIndexType = Screen (Point3 Int)
 

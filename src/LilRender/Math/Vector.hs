@@ -1,6 +1,14 @@
-module Math.Vector (Vector2(..), Vector3(..), VectorMath, dotVect, crossVect, scaleVect, magnitudeVect, normalizeVect) where
+module LilRender.Math.Vector (
+      Vector2(..)
+    , Vector3(..)
+    , VectorMath
+    , dotVect
+    , crossVect
+    , scaleVect
+    , magnitudeVect
+    , normalizeVect
+    ) where
 
-import Control.Lens
 import Data.Function
 import Data.Monoid
 

@@ -1,4 +1,4 @@
-module Model (
+module LilRender.Model (
       VertexPoint(..)
     , TextureCoordinate(..)
     , VertexNormal(..)
@@ -6,9 +6,9 @@ module Model (
     , Face(..)
     , Model(..)) where
 
-import qualified Data.Vector   as V
-import           Math.Geometry
-import           Math.Vector
+import qualified Data.Vector             as V
+import           LilRender.Math.Geometry
+import           LilRender.Math.Vector
 
 
 newtype VertexPoint = VertexPoint { unwrapVertexPoint :: World (Point3 Double) } deriving (Show, Eq)

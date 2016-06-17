@@ -1,11 +1,8 @@
-module Math.Geometry where
+module LilRender.Math.Geometry where
 
-import Control.Lens  hiding (index)
-import Data.Function
 import Data.Ix
-import Data.Monoid
 
-import Math.Vector
+import LilRender.Math.Vector
 
 class Point p
 
@@ -32,9 +29,6 @@ instance (Ix a) => Ix (Point3 a) where
     index   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = index (p1z, p2z) pz + rangeSize (p1z, p2z) * (index (p1y, p2y) py + rangeSize (p1y, p2y) * index (p1x, p2x) px)
     inRange (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = inRange (p1x, p2x) px && inRange (p1y, p2y) py && inRange (p1z, p2z) pz
 
-makeLenses ''Point2
-makeLenses ''Point3
-
 newtype World a = World { fromWorld :: a } deriving (Eq, Show, Functor, Ord, Ix)
 newtype Screen a = Screen { fromScreen :: a } deriving (Eq, Show, Functor, Ord, Ix)
 newtype Barycentric a = Barycentric { fromBarycentric :: a } deriving (Eq, Show, Functor, Ord, Ix)
@@ -42,8 +36,6 @@ newtype Barycentric a = Barycentric { fromBarycentric :: a } deriving (Eq, Show,
 data Triangle a = Triangle {
         _vertex1, _vertex2, _vertex3 :: !a
 } deriving (Show, Eq, Functor)
-
-makeLenses ''Triangle
 
 toBarycentric :: (Real a, Fractional b, Ord b) => Triangle (Screen (Point3 a)) -> Screen (Point2 a) -> Barycentric (Point3 b)
 toBarycentric (Triangle (Screen (Point3 p1x p1y _)) (Screen (Point3 p2x p2y _)) (Screen (Point3 p3x p3y _))) (Screen (Point2 px py))

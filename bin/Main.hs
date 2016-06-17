@@ -1,25 +1,23 @@
 module Main where
 
-import           Control.DeepSeq         (force)
-import           Control.Exception       (evaluate)
-import           Control.Lens
+import           Control.DeepSeq                 (force)
+import           Control.Exception               (evaluate)
 import           Control.Monad
-import           Control.Monad.Primitive
-import           Criterion.Measurement   (getTime, initializeTime, secs)
-import           Data.Foldable
+import           Criterion.Measurement           (getTime, initializeTime, secs)
+import           Data.Foldable                   (toList)
 
-import           Image
-import           Image.Color
-import           Image.Mutable
-import qualified Image.NamedColors       as NC
-import           Image.Texture
-import           Math.Geometry
-import           Math.Matrix
-import           Math.Matrix.Transform
-import           Math.Vector
-import           Model
-import           Model.Wavefront
-import           Renderer
+import           LilRender.Image
+import           LilRender.Image.Color
+import           LilRender.Image.Mutable         (freezeImage, thawImage)
+import qualified LilRender.Image.NamedColors     as NC
+import           LilRender.Image.Texture         (Texture, loadTexture)
+import           LilRender.Math.Geometry
+import           LilRender.Math.Matrix
+import           LilRender.Math.Matrix.Transform (viewportTransform)
+import           LilRender.Math.Vector
+import           LilRender.Model
+import           LilRender.Model.Wavefront
+import           LilRender.Renderer
 
 lightIntensityAtPointOnFace :: Vector3 Double -> Face -> Barycentric (Point3 Double) -> Double
 lightIntensityAtPointOnFace lightDirection face = triangularInterpolate (Triangle i1 i2 i3)
@@ -69,12 +67,12 @@ drawModel width height !model !texture = do
 main :: IO ()
 main = do
     model <- loadWavefrontObj "data/african_head/african_head.obj"
-    texture <- readImage TGA "data/african_head/african_head_diffuse.tga"
+    texture <- loadTexture "data/african_head/african_head_diffuse.tga"
 
     initializeTime
 
     startTime <- getTime
-    img <- drawModel 400 400 model (Texture texture)
+    img <- drawModel 400 400 model texture
     endTime <- getTime
 
     putStrLn $ "Frame time: " ++ secs (endTime - startTime)

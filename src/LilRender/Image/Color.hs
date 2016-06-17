@@ -1,12 +1,12 @@
-module Image.Color (RGBColor(..), scaleColor, transparentColor, blendColor) where
+module LilRender.Image.Color (RGBColor(..), scaleColor, transparentColor, blendColor) where
 
 import Control.DeepSeq
 import Data.Bits
 import Data.Word
-import GHC.Generics     (Generic)
+import GHC.Generics    (Generic)
 import Text.Printf
 
-import Data.Store       (Store)
+import Data.Store      (Store)
 import TH.Derive
 
 data RGBColor = RGBColor {

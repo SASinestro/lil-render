@@ -86,3 +86,22 @@ executable lil-render
     hs-source-dirs:     bin
     default-language:   Haskell2010
 
+benchmark lil-render-bench
+    type:             exitcode-stdio-1.0
+    main-is:          Bench.hs
+
+    build-depends:    base       >= 4.7   && < 5
+                    , lil-render >= 0.1.0 && < 0.2
+                    , criterion  >= 1.1   && < 1.2
+                    , QuickCheck >= 2.8   && < 2.9
+
+    default-extensions:  BangPatterns
+                       , TemplateHaskell
+                       , OverloadedStrings
+                       , TypeFamilies
+                       , GADTs
+
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
+
+    hs-source-dirs:   bin
+    default-language: Haskell2010

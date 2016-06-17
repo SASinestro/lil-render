@@ -24,3 +24,4 @@ cabal.project.local
 .stylish-haskell.yaml
 *.obj
 *.tga
+!data/*/*

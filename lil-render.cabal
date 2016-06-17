@@ -16,16 +16,21 @@ cabal-version:        >=1.10
 executable lil-render
   main-is:            Main.hs
   other-modules:      Image
+                    , Image.TGA
+                    , Image.Texture
                     , Image.Mutable
-                    , Image.Drawing.Primitives
+                    , Image.DrawingPrimitives
                     , Image.Color
                     , Image.NamedColors
-                    , Image.TGA
+
                     , Model
                     , Model.Wavefront
-                    , Math.Vector
+
+                    , Math.Geometry
                     , Math.Matrix
                     , Math.Matrix.Transform
+                    , Math.Vector
+
                     , Renderer
   build-depends:      base             >= 4.7     && < 5
                     , binary           >= 0.7.5   && < 0.8
@@ -36,12 +41,15 @@ executable lil-render
                     , reflection       >= 2.1     && < 2.2
                     , attoparsec       >= 0.13.0  && < 0.14
                     , text             >= 1.2.2   && < 1.3
-                    , MonadRandom      >= 0.4.2.3 && < 0.5
+                    , MonadRandom      >= 0.4.2   && < 0.5
+                    , criterion        >= 1.1.1   && < 1.2
+                    , deepseq          >= 1.4.1   && < 1.5
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
                       , GADTs
                       , StandaloneDeriving
+                      , GeneralizedNewtypeDeriving
                       , DeriveFunctor
                       , DeriveFoldable
                       , BinaryLiterals
@@ -55,7 +63,9 @@ executable lil-render
                       , RankNTypes
                       , MultiParamTypeClasses
                       , OverloadedStrings
-  ghc-options: -funfolding-use-threshold=16 -O2
+                      , ViewPatterns
+                      , BangPatterns
+  ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
 
   hs-source-dirs:     src
   default-language:   Haskell2010

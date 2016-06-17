@@ -1,44 +1,30 @@
 module Model (
-      VertexPoint
-    , TextureCoordinate
-    , VertexNormal
+      VertexPoint(..)
+    , TextureCoordinate(..)
+    , VertexNormal(..)
     , Vertex(..)
     , Face(..)
-    , Model(..)
-    , point
-    , textureCoordinate
-    , vertexNormal
-    , firstVertex
-    , secondVertex
-    , thirdVertex
-    , vertices
-    , faces) where
+    , Model(..)) where
 
-import Control.Lens
-import Math.Vector
+import qualified Data.Vector   as V
+import           Math.Geometry
+import           Math.Vector
 
-type VertexPoint = Vector3 Double
-type TextureCoordinate = Vector2 Double
-type VertexNormal = Vector3 Double
+
+newtype VertexPoint = VertexPoint { unwrapVertexPoint :: World (Point3 Double) } deriving (Show, Eq)
+newtype TextureCoordinate = TextureCoordinate { unwrapTextureCoordinate :: Point2 Double } deriving (Show, Eq)
+newtype VertexNormal = VertexNormal { unwrapVertexNormal :: World (Vector3 Double) } deriving (Show, Eq)
 
 data Vertex = Vertex {
-        _point             :: VertexPoint
-      , _textureCoordinate :: Maybe TextureCoordinate
-      , _vertexNormal      :: Maybe VertexNormal
-} deriving (Eq, Show)
+                point             :: VertexPoint
+              , textureCoordinate :: Maybe TextureCoordinate
+              , vertexNormal      :: Maybe VertexNormal
+        } deriving (Eq, Show)
 
 data Face = Face {
-        _firstVertex, _secondVertex, _thirdVertex :: Vertex
+        firstVertex, secondVertex, thirdVertex :: !Vertex
 } deriving (Eq, Show)
 
-vertices :: Fold Face Vertex
-vertices = folding (\(Face v1 v2 v3) -> [v1, v2, v3])
-
-data Model = Model {
-      _faces :: [Face]
+newtype Model = Model {
+      faces :: V.Vector Face
 } deriving (Eq, Show)
-
-
-makeLenses ''Vertex
-makeLenses ''Face
-makeLenses ''Model

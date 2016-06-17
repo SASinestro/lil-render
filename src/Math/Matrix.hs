@@ -68,3 +68,9 @@ mMult a b
         ay = a ^. mRows
         bx = b ^. mCols
         by = b ^. mRows
+
+mTranspose :: Matrix a -> Matrix a
+mTranspose mat = Matrix (V.fromList [mat `mIndex` (i, j) | i <- [1 .. cols], j <- [1 .. rows] ]) rows cols
+    where
+        rows = mat ^. mRows
+        cols = mat ^. mCols

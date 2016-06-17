@@ -62,7 +62,7 @@ library
                       , OverloadedStrings
                       , ViewPatterns
                       , BangPatterns
-    ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
 
     hs-source-dirs:     src
     default-language:   Haskell2010
@@ -81,7 +81,7 @@ executable lil-render
                        , TypeFamilies
                        , GADTs
 
-    ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
 
     hs-source-dirs:     bin
     default-language:   Haskell2010

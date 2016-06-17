@@ -1,18 +1,26 @@
-module Image (Image(..), ImageIndexType, (<!>), ImageFormat(..), readImage, writeImage, makeImage, ImageConvertible) where
+module LilRender.Image (
+      Image(..)
+    , ImageIndexType
+    , (<!>)
+    , ImageFormat(..)
+    , readImage
+    , writeImage
+    , makeImage
+    , ImageConvertible
+    ) where
 
 import           Control.DeepSeq
-import           Control.Lens
 import           Control.Monad
 import           Data.Foldable
 import           Data.Ix
-import           Data.Vector     ((!))
-import qualified Data.Vector     as V
-import           GHC.Generics    (Generic)
+import           Data.Vector             ((!))
+import qualified Data.Vector             as V
+import           GHC.Generics            (Generic)
 
-import           Image.Color
-import           Image.TGA
-import           Math.Geometry
-import           Math.Vector
+import           LilRender.Image.Color
+import           LilRender.Image.TGA
+import           LilRender.Math.Geometry
+import           LilRender.Math.Vector
 
 type ImageIndexType = Screen (Point2 Double)
 
@@ -56,7 +64,6 @@ makeImage width height color = Image {
     , _width = width
     , _height = height
 }
-
 
 instance ImageConvertible TGAImage where
     toImage (TGAImage TGAHeader { _tgaHeight = height, _tgaWidth = width } color_map image_data) = Image storage height' width'

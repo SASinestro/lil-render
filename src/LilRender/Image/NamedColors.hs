@@ -1,6 +1,6 @@
-module Image.NamedColors where
+module LilRender.Image.NamedColors where
 
-import Image.Color
+import LilRender.Image.Color
 
 aliceBlue = RGBColor 240 248 255 255
 alpha = RGBColor 0 0 0 0

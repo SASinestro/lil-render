@@ -1,4 +1,4 @@
-module Image.TGA (
+module LilRender.Image.TGA (
       TGAHeader(..)
     , simpleTGAHeader
     , TGAImageType(..)
@@ -13,14 +13,14 @@ module Image.TGA (
 
 import           Control.Monad
 import           Data.Bits
-import qualified Data.ByteString     as BS
+import qualified Data.ByteString       as BS
 import           Data.Int
-import qualified Data.Vector         as V
+import qualified Data.Vector           as V
 import           Data.Word
-import           Image.Color
+import           LilRender.Image.Color
 
 import           Data.Store
-import           Data.Store.Internal (skip)
+import           Data.Store.Internal   (skip)
 import           TH.Derive
 
 data TGAHeader = TGAHeader {

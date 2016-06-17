@@ -12,40 +12,36 @@ category:
 build-type:           Simple
 cabal-version:        >=1.10
 
+library
+    exposed-modules:    LilRender.Image
+                      , LilRender.Image.TGA
+                      , LilRender.Image.Texture
+                      , LilRender.Image.Mutable
+                      , LilRender.Image.DrawingPrimitives
+                      , LilRender.Image.Color
+                      , LilRender.Image.NamedColors
 
-executable lil-render
-  main-is:            Main.hs
-  other-modules:      Image
-                    , Image.TGA
-                    , Image.Texture
-                    , Image.Mutable
-                    , Image.DrawingPrimitives
-                    , Image.Color
-                    , Image.NamedColors
+                      , LilRender.Model
+                      , LilRender.Model.Wavefront
 
-                    , Model
-                    , Model.Wavefront
+                      , LilRender.Math.Geometry
+                      , LilRender.Math.Matrix
+                      , LilRender.Math.Matrix.Transform
+                      , LilRender.Math.Vector
 
-                    , Math.Geometry
-                    , Math.Matrix
-                    , Math.Matrix.Transform
-                    , Math.Vector
+                      , LilRender.Renderer
 
-                    , Renderer
-  build-depends:      base             >= 4.7     && < 5
-                    , bytestring       >= 0.10.6  && < 0.11
-                    , vector           >= 0.11.0  && < 0.12
-                    , lens             >= 4.13    && < 4.14
-                    , primitive        >= 0.6.1   && < 0.7
-                    , reflection       >= 2.1     && < 2.2
-                    , attoparsec       >= 0.13.0  && < 0.14
-                    , text             >= 1.2.2   && < 1.3
-                    , MonadRandom      >= 0.4.2   && < 0.5
-                    , criterion        >= 1.1.1   && < 1.2
-                    , deepseq          >= 1.4.1   && < 1.5
-                    , store            >= 0.2.0.0 && < 0.3
-                    , th-utilities     >= 0.1.0   && < 0.2
-  default-extensions:   DeriveGeneric
+    build-depends:      base             >= 4.7     && < 5
+                      , bytestring       >= 0.10.6  && < 0.11
+                      , vector           >= 0.11.0  && < 0.12
+                      , primitive        >= 0.6.1   && < 0.7
+                      , deepseq          >= 1.4.1   && < 1.5
+                      , attoparsec       >= 0.13.0  && < 0.14
+                      , text             >= 1.2.2   && < 1.3
+                      , store            >= 0.2.0.0 && < 0.3
+                      , th-utilities     >= 0.1.0   && < 0.2
+
+    default-extensions: DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
                       , GADTs
@@ -66,7 +62,27 @@ executable lil-render
                       , OverloadedStrings
                       , ViewPatterns
                       , BangPatterns
-  ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
+    ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
 
-  hs-source-dirs:     src
-  default-language:   Haskell2010
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+
+executable lil-render
+    main-is:          Main.hs
+
+    build-depends:      base       >= 4.7     && < 5
+                      , criterion  >= 1.1.1   && < 1.2
+                      , deepseq    >= 1.4.1   && < 1.5
+                      , lil-render >= 0.1.0   && < 0.2
+
+    default-extensions:  BangPatterns
+                       , TemplateHaskell
+                       , OverloadedStrings
+                       , TypeFamilies
+                       , GADTs
+
+    ghc-options: -O -funfolding-use-threshold=16 -funbox-strict-fields
+
+    hs-source-dirs:     bin
+    default-language:   Haskell2010
+

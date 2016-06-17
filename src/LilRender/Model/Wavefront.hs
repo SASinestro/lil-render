@@ -1,15 +1,14 @@
 module LilRender.Model.Wavefront (loadWavefrontObj) where
 
 import           Control.Applicative
-import           Control.Monad
 import           Data.Attoparsec.Text
 import           Data.Either
-import qualified Data.Text               as T
-import qualified Data.Vector             as V
+import qualified Data.Text                as T
+import qualified Data.Vector              as V
 
 import           LilRender.Math.Geometry
 import           LilRender.Math.Vector
-import           LilRender.Model         hiding (vertices)
+import           LilRender.Model.Internal
 
 data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 
@@ -23,7 +22,7 @@ vertexPointParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return . VertexPoint . World $ Point3 x y z
+    return . VertexPoint . ModelSpace $ Point3 x y z
 
 textureCoordParser :: Parser TextureCoordinate
 textureCoordParser = do
@@ -45,7 +44,7 @@ vertexNormalParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return . VertexNormal . World $ Vector3 x y z
+    return . VertexNormal . ModelSpace $ Vector3 x y z
 
 faceParser :: Parser UnresolvedFace
 faceParser = do

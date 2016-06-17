@@ -4,18 +4,13 @@ module LilRender.Math.Matrix (
     , mUpdate
     , mMult
     , mTranspose
-
-    , matrixFrom2DList
     , identityMatrix
 )where
 
-import           Control.Arrow         (first)
-import qualified Data.Ix               as Ix
-import           Data.Vector           ((!), (//))
-import qualified Data.Vector           as V
-import qualified Data.Vector.Mutable   as MV
-
-import           LilRender.Math.Vector
+import           Control.Arrow (first)
+import qualified Data.Ix       as Ix
+import           Data.Vector   ((!), (//))
+import qualified Data.Vector   as V
 
 data Matrix a = Matrix {
           _mStorage :: V.Vector a
@@ -65,11 +60,15 @@ mTranspose mat@(Matrix _ cols rows) = Matrix (V.fromList [mat `mIndex` (i, j) | 
 
 --
 
-matrixFrom2DList :: [[a]] -> Matrix a
-matrixFrom2DList lol = Matrix (V.fromList $ concat lol) width height
-    where
-        width  = length $ head lol
-        height = length lol
+-- matrixFrom2DList :: [[a]] -> Matrix a
+-- matrixFrom2DList lol = Matrix (V.fromList $ concat lol) width height
+--     where
+--         width  = length $ head lol
+--         height = length lol
 
 identityMatrix :: (Num a) => Int -> Matrix a
-identityMatrix n = matrixFrom2DList [replicate (j - 1) 0 ++ [1] ++ replicate (n - j) 0 | j <- [1 .. n]]
+identityMatrix 4 = Matrix (V.fromList [1, 0, 0, 0,
+                                       0, 0, 0, 0,
+                                       0, 0, 1, 0,
+                                       0, 0, 0, 1 ]) 4 4
+-- identityMatrix n = matrixFrom2DList [replicate (j - 1) 0 ++ [1] ++ replicate (n - j) 0 | j <- [1 .. n]]

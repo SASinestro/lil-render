@@ -1,6 +1,8 @@
 module LilRender.Math.Geometry where
 
 import Data.Ix
+import Data.Vector.Unboxed          (Unbox)
+import Data.Vector.Unboxed.Deriving
 
 import LilRender.Math.Vector
 
@@ -11,6 +13,11 @@ data Point2 a = Point2 {
     , _p2_y :: !a
 } deriving (Show, Eq, Functor, Foldable, Ord)
 instance (Fractional a) => Point (Point2 a)
+
+derivingUnbox "Point2"
+    [t| forall a. (Unbox a) => Point2 a -> (a, a) |]
+    [| \(Point2 x y) -> (x, y) |]
+    [| \(x, y) -> (Point2 x y) |]
 
 instance (Ix a) => Ix (Point2 a) where
     range (Point2 p1x p1y, Point2 p2x p2y) = [Point2 i1 i2 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y)]
@@ -24,14 +31,48 @@ data Point3 a = Point3 {
 } deriving (Show, Eq, Functor, Foldable, Ord)
 instance (Fractional a) => Point (Point3 a)
 
+derivingUnbox "Point3"
+    [t| forall a. (Unbox a) => Point3 a -> (a, a, a) |]
+    [| \(Point3 x y z) -> (x, y, z) |]
+    [| \(x, y, z) -> (Point3 x y z) |]
+
 instance (Ix a) => Ix (Point3 a) where
     range   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) = [Point3 i1 i2 i3 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y), i3 <- range (p1z, p2z)]
     index   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = index (p1z, p2z) pz + rangeSize (p1z, p2z) * (index (p1y, p2y) py + rangeSize (p1y, p2y) * index (p1x, p2x) px)
     inRange (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = inRange (p1x, p2x) px && inRange (p1y, p2y) py && inRange (p1z, p2z) pz
 
+newtype ModelSpace a = ModelSpace { fromModelSpace :: a } deriving (Eq, Show, Functor, Ord, Ix)
 newtype World a = World { fromWorld :: a } deriving (Eq, Show, Functor, Ord, Ix)
+newtype Camera a = Camera { fromCamera :: a } deriving (Eq, Show, Functor, Ord, Ix)
+newtype Clip a = Clip { fromClip :: a } deriving (Eq, Show, Functor, Ord, Ix)
 newtype Screen a = Screen { fromScreen :: a } deriving (Eq, Show, Functor, Ord, Ix)
+
 newtype Barycentric a = Barycentric { fromBarycentric :: a } deriving (Eq, Show, Functor, Ord, Ix)
+
+derivingUnbox "ModelSpace"
+    [t| forall a. (Unbox a) => ModelSpace a -> a |]
+    [| \(ModelSpace a) -> a |]
+    [| \a -> (ModelSpace a) |]
+
+derivingUnbox "World"
+    [t| forall a. (Unbox a) => World a -> a |]
+    [| \(World a) -> a |]
+    [| \a -> (World a) |]
+
+derivingUnbox "Camera"
+    [t| forall a. (Unbox a) => Camera a -> a |]
+    [| \(Camera a) -> a |]
+    [| \a -> (Camera a) |]
+
+derivingUnbox "Clip"
+    [t| forall a. (Unbox a) => Clip a -> a |]
+    [| \(Clip a) -> a |]
+    [| \a -> (Clip a) |]
+
+derivingUnbox "Screen"
+    [t| forall a. (Unbox a) => Screen a -> a |]
+    [| \(Screen a) -> a |]
+    [| \a -> (Screen a) |]
 
 data Triangle a = Triangle {
         _vertex1, _vertex2, _vertex3 :: !a
@@ -46,5 +87,5 @@ toBarycentric (Triangle (Screen (Point3 p1x p1y _)) (Screen (Point3 p2x p2y _)) 
         vect2 = Vector3 (p3y - p1y) (p2y - p1y) (p1y - py)
         (Vector3 a b c) = realToFrac <$> crossVect vect1 vect2
 
-triangularInterpolate :: Triangle Double -> Barycentric (Point3 Double) -> Double
-triangularInterpolate (Triangle a b c) (Barycentric (Point3 lambda1 lambda2 lambda3)) = a * lambda1 + b * lambda2 + c * lambda3
+triangularInterpolate :: Double -> Double -> Double -> Barycentric (Point3 Double) -> Double
+triangularInterpolate a b c (Barycentric (Point3 lambda1 lambda2 lambda3)) = a * lambda1 + b * lambda2 + c * lambda3

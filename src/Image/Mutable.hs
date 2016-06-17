@@ -11,8 +11,9 @@ import           Control.Monad.ST
 
 import           Image
 import           Image.Color
+import           Math.Geometry
 
-type ZBufferIndexType = (Int, Int, Int)
+type ZBufferIndexType = Screen (Point3 Int)
 
 data MutableImage s = MutableImage {
       _mStorage :: V.MVector s (RGBColor, Int)
@@ -21,21 +22,18 @@ data MutableImage s = MutableImage {
     }
 
 thawImage :: PrimMonad m => Image -> m (MutableImage (PrimState m))
-thawImage img = do
-    stor <- V.thaw . V.map (\c -> (c, 0)) $ _storage img
-    return $ MutableImage stor (_width img) (_height img)
+thawImage (Image storage width height) = do
+    mStorage <- V.thaw . V.map (\c -> (c, 0)) $ storage
+    return $ MutableImage mStorage width height
 
 freezeImage :: PrimMonad m => MutableImage (PrimState m) -> m Image
-freezeImage img = do
-    let stor' = _mStorage img
-    stor  <- V.freeze stor'
-    return $ Image (V.map fst stor) (_mWidth img) (_mHeight img)
+freezeImage (MutableImage mStorage width height) = do
+    storage <- V.freeze mStorage
+    return $ Image (V.map fst storage) width height
 
-drawPixel :: PrimMonad m => MutableImage (PrimState m) -> RGBColor -> ZBufferIndexType -> m ()
-drawPixel img color (x, y, z) = do
-    let stor = _mStorage img
-    (_, oldZ) <- MV.read stor (idx x y)
-    when (oldZ < z) $ MV.write stor (idx x y) (color, z)
+drawPixel :: PrimMonad m => MutableImage (PrimState m) -> ZBufferIndexType -> RGBColor -> m ()
+drawPixel (MutableImage mStorage width _) (Screen (Point3 x y z)) color = do
+    (_, oldZ) <- MV.read mStorage idx
+    when (oldZ < z) $ MV.write mStorage idx (color, z)
         where
-            w = _mWidth img
-            idx x' y' = w * y'+ x'
+            idx = width * y + x

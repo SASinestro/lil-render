@@ -1,50 +1,46 @@
-module Image (Image(..), ImageIndexType, (<!>), storage, width, height, ImageFormat(..), readImage, writeImage, makeImage, ImageConvertible) where
+module Image (Image(..), ImageIndexType, (<!>), ImageFormat(..), readImage, writeImage, makeImage, ImageConvertible) where
 
-import           Image.Color
-import           Image.TGA
-
+import           Control.DeepSeq
 import           Control.Lens
 import           Control.Monad
 import           Data.Foldable
 import           Data.Ix
-import           Data.Vector   ((!))
-import qualified Data.Vector   as V
+import           Data.Vector     ((!))
+import qualified Data.Vector     as V
+import           GHC.Generics    (Generic)
 
-type ImageIndexType = (Int, Int)
+import           Image.Color
+import           Image.TGA
+import           Math.Geometry
+import           Math.Vector
 
+type ImageIndexType = Screen (Point2 Double)
 
 data Image = Image {
       _storage :: V.Vector RGBColor
     , _width   :: Int
     , _height  :: Int
-} deriving (Eq)
+} deriving (Eq, Generic)
 
-(<!>) :: Image -> ImageIndexType -> RGBColor
-img <!> (x, y) = _storage img ! (w * y + x)
-                where
-                    w = _width img
-                    h = _height img
+instance NFData Image
+
+(<!>) :: Image -> Screen (Point2 Double) -> RGBColor
+Image { _storage = storage,  _width = width } <!> (Screen (Point2 x y)) = storage ! (width * round y + round x)
 
 instance Show Image where
-    show img = foldl (++) header $ line <$> grid w h
+    show img@(Image _ w h) = foldl (++) header $ line <$> grid (fromIntegral w) (fromIntegral h)
         where
-            grid :: Int -> Int -> [[ ImageIndexType ]]
-            grid x y = fmap range [ ( (0, j), (x - 1, j) ) | j <- [0 .. y - 1]]
-
-            w = _width img
-            h = _height img
+            grid :: Double -> Double -> [[ ImageIndexType ]]
+            grid x y = [ [ Screen $ Point2 i j | i <- [0 .. x - 1] ] |  j <- [0 .. y - 1] ]
 
             header = "Image (" ++ show w ++ "x" ++ show h ++ ")\n"
 
             line :: [ ImageIndexType ] -> String
             line (idx:idxs) = foldl (\accum x -> accum ++ " " ++ show (img <!> x)) ("    " ++ show (img <!> idx)) idxs ++ "\n"
 
-makeLenses ''Image
-
 class ImageConvertible a where
     toImage :: a -> Image
     fromImage :: Image -> a
-
 
 data ImageFormat = TGA
 

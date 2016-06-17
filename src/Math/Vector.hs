@@ -1,22 +1,19 @@
-module Math.Vector (Vector2(..), Vector3(..), VectorMath, dotVect, crossVect, scaleVect, v2_x, v2_y, v3_x, v3_y, v3_z, magnitudeVect, normalizeVect) where
+module Math.Vector (Vector2(..), Vector3(..), VectorMath, dotVect, crossVect, scaleVect, magnitudeVect, normalizeVect) where
 
 import Control.Lens
 import Data.Function
 import Data.Monoid
 
 data Vector2 a = Vector2 {
-      _v2_x :: a
-    , _v2_y :: a
+      v2_x :: !a
+    , v2_y :: !a
 } deriving (Show, Eq, Functor, Foldable)
 
 data Vector3 a = Vector3 {
-      _v3_x :: a
-    , _v3_y :: a
-    , _v3_z :: a
+      v3_x :: !a
+    , v3_y :: !a
+    , v3_z :: !a
 } deriving (Show, Eq, Functor, Foldable)
-
-makeLenses ''Vector2
-makeLenses ''Vector3
 
 instance (Num a) => Monoid (Vector2 a) where
     mempty = zeroVect

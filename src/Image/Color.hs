@@ -1,18 +1,47 @@
-module Image.Color (RGBColor(..), red, green, blue, alpha, scaleColor, transparentColor, blendColor) where
+module Image.Color (RGBColor(..), scaleColor, transparentColor, blendColor) where
 
-import Control.Lens
+import Control.DeepSeq
 import Data.Bits
 import Data.Word
+import GHC.Generics     (Generic)
 import Text.Printf
 
-data RGBColor = RGBColor {
-      _red   :: Word8
-    , _green :: Word8
-    , _blue  :: Word8
-    , _alpha :: Word8
-} deriving (Eq)
+import Foreign
+import Foreign.Storable
 
-makeLenses ''RGBColor
+data RGBColor = RGBColor {
+      _red   :: !Word8
+    , _green :: !Word8
+    , _blue  :: !Word8
+    , _alpha :: !Word8
+} deriving (Eq, Generic)
+
+instance NFData RGBColor
+
+instance Storable RGBColor where
+    sizeOf _ = 4
+    alignment _ = 4
+
+    {-# INLINE peek #-}
+    peek ptr = do
+        let wordPtr = castPtr ptr :: Ptr Word32
+        word <- peek wordPtr
+
+        let red   = fromIntegral $ word             .&. 0xFF :: Word8
+        let green = fromIntegral $ word `shiftR` 8  .&. 0xFF :: Word8
+        let blue  = fromIntegral $ word `shiftR` 16 .&. 0xFF :: Word8
+        let alpha = fromIntegral $ word `shiftR` 24 .&. 0xFF :: Word8
+
+        return $ RGBColor red green blue alpha
+
+    poke ptr (RGBColor r g b a) = poke (castPtr ptr) word
+        where
+            r' = fromIntegral r :: Word32
+            g' = fromIntegral g :: Word32
+            b' = fromIntegral b :: Word32
+            a' = fromIntegral a :: Word32
+            word = r' + g' `shiftL` 8 + b' `shiftL` 16 + a' `shiftL` 24
+
 
 instance Show RGBColor where
     show color = printf "(#%02X%02X%02X, %02f)" (_red color) (_green color) (_blue color) (fromIntegral (_alpha color) / 255 :: Double)

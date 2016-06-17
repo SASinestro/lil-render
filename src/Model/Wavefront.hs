@@ -5,7 +5,9 @@ import           Control.Monad
 import           Data.Attoparsec.Text
 import           Data.Either
 import qualified Data.Text            as T
+import qualified Data.Vector          as V
 
+import           Math.Geometry
 import           Math.Vector
 import           Model                hiding (vertices)
 
@@ -21,7 +23,7 @@ vertexPointParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return $ Vector3 x y z
+    return . VertexPoint . World $ Point3 x y z
 
 textureCoordParser :: Parser TextureCoordinate
 textureCoordParser = do
@@ -31,7 +33,7 @@ textureCoordParser = do
     skipSpace
     y <- double
     skipWhile $ not . isEndOfLine
-    return $ Vector2 x y
+    return . TextureCoordinate $ Point2 x y
 
 vertexNormalParser :: Parser VertexNormal
 vertexNormalParser = do
@@ -43,7 +45,7 @@ vertexNormalParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return $ Vector3 x y z
+    return . VertexNormal . World $ Vector3 x y z
 
 faceParser :: Parser UnresolvedFace
 faceParser = do
@@ -74,25 +76,25 @@ faceParser = do
             norm <- signed decimal
             return (vert, Just text, Just norm)
 
-vertices :: [T.Text] -> [VertexPoint]
-vertices = rights . map (parseOnly vertexPointParser) . filter (("v " ==) . T.take 2)
+vertices :: [T.Text] -> V.Vector VertexPoint
+vertices = V.fromList . rights . fmap (parseOnly vertexPointParser)
 
-textureCoords :: [T.Text] -> [TextureCoordinate]
-textureCoords = rights . map (parseOnly textureCoordParser) . filter (("vt" ==) . T.take 2)
+textureCoords :: [T.Text] -> V.Vector TextureCoordinate
+textureCoords = V.fromList . rights . fmap (parseOnly textureCoordParser)
 
-vertexNormals :: [T.Text] -> [VertexNormal]
-vertexNormals = rights . map (parseOnly vertexNormalParser) . filter (("vn" ==) . T.take 2)
+vertexNormals :: [T.Text] -> V.Vector VertexNormal
+vertexNormals = V.fromList . rights . fmap (parseOnly vertexNormalParser)
 
-unresolvedFaces :: [T.Text] -> [UnresolvedFace]
-unresolvedFaces = rights . map (parseOnly faceParser) . filter (("f " ==) . T.take 2)
+unresolvedFaces :: [T.Text] -> V.Vector UnresolvedFace
+unresolvedFaces = V.fromList . rights . fmap (parseOnly faceParser)
 
 faceResolver vert text norm = fmap faceResolver'
         where
         faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (Vertex (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
                                                                                       (Vertex (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
                                                                                       (Vertex (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
-        lookup list idx1 = list !! (idx1 - 1)
-        flookup list idx1 = (list !!) . (+ (-1)) <$> idx1
+        lookup list idx = list V.! (idx - 1)
+        flookup list idx = (list V.!) . (+ (-1)) <$> idx
 
 loadWavefrontObj :: FilePath -> IO Model
 loadWavefrontObj path = do

@@ -7,34 +7,46 @@ import Data.Maybe
 
 import Image
 import Image.Color
-import Image.Drawing.Primitives
+import Image.DrawingPrimitives
 import Image.Mutable
+import Image.Texture
+
+import Model
+
+import Math.Geometry
 import Math.Matrix
 import Math.Matrix.Transform
 import Math.Vector
-import Model
+
+pointToTextureCoords :: TextureCoordinate -> TextureCoordinate -> TextureCoordinate -> Barycentric (Point3 Double) -> TextureCoordinate
+pointToTextureCoords (TextureCoordinate (Point2 t1x t1y)) (TextureCoordinate (Point2 t2x t2y)) (TextureCoordinate (Point2 t3x t3y)) bary = TextureCoordinate (Point2 x y)
+    where
+        x = triangularInterpolate (Triangle t1x t2x t3x) bary
+        y = triangularInterpolate (Triangle t2y t2y t3y) bary
 
 drawTexturedModel :: forall m. (PrimMonad m) => MutableImage (PrimState m) -- Target
                                              -> Model -- The model to be rendered
                                              -> Transform -- Matrix to transform world coordinates into screen coordinates
-                                             -> Image -- The texture
-                                             -> (Face -> Vector3 Double -> RGBColor -> m RGBColor) -- For lighting, etc
+                                             -> Texture -- The texture
+                                             -> (Face -> Barycentric (Point3 Double) -> RGBColor -> m RGBColor) -- For lighting, etc
                                              -> m ()
 drawTexturedModel image model projection texture colorMutator =
-    mapM_ (\face -> drawFilledTriangle image (getTextureColor face) (screenTriangleForFace face)) $ model ^. faces
+    mapM_ (\face -> drawFilledTriangle image (getTextureColor face) (screenTriangleForFace face)) $ faces model
     where
-        textureWidth = fromIntegral $ texture ^. width
-        textureHeight = fromIntegral $ texture ^. height
-
-        textureCoordinateForPoint :: TextureCoordinate -> TextureCoordinate -> TextureCoordinate -> Vector3 Double -> ImageIndexType
-        textureCoordinateForPoint (Vector2 a1 a2) (Vector2 b1 b2) (Vector2 c1 c2) (Vector3 ta tb tc) =
-            (round ((a1 * ta + b1 * tb + c1 * tc) * textureWidth), round ((a2 * ta + b2 * tb + c2 * tc) * textureHeight))
-
-        screenTriangleForFace :: Face -> Triangle
-        screenTriangleForFace face = (v1, v2, v3)
-            where (v1:v2:v3:_) = (fmap . fmap) round $ transform3DVector projection <$> face ^.. vertices . point
-
-        getTextureColor :: Face -> Vector3 Double -> m RGBColor
-        getTextureColor face barycentric = colorMutator face barycentric $ texture <!> textureCoordinateForPoint t1 t2 t3 barycentric
+        screenTriangleForFace :: Face -> Triangle (Screen (Point3 Double))
+        screenTriangleForFace face = Triangle p1 p2 p3
             where
-                (t1:t2:t3:_) = face ^.. vertices . textureCoordinate . _Just
+                (Face
+                    (Vertex (VertexPoint (World p1')) _ _)
+                    (Vertex (VertexPoint (World p2')) _ _)
+                    (Vertex (VertexPoint (World p3')) _ _)) = face
+                p1 = Screen $ transform3DPoint projection p1'
+                p2 = Screen $ transform3DPoint projection p2'
+                p3 = Screen $ transform3DPoint projection p3'
+
+        getTextureColor :: Face -> Barycentric (Point3 Double) -> m RGBColor
+        getTextureColor face barycentric = colorMutator face barycentric . getColorFromTexture texture $ pointToTextureCoords t1 t2 t3 barycentric
+            where
+                (Face (Vertex _ (Just t1) _)
+                      (Vertex _ (Just t2) _)
+                      (Vertex _ (Just t3) _)) = face

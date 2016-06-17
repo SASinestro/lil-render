@@ -33,7 +33,6 @@ executable lil-render
 
                     , Renderer
   build-depends:      base             >= 4.7     && < 5
-                    , binary           >= 0.7.5   && < 0.8
                     , bytestring       >= 0.10.6  && < 0.11
                     , vector           >= 0.11.0  && < 0.12
                     , lens             >= 4.13    && < 4.14
@@ -44,6 +43,8 @@ executable lil-render
                     , MonadRandom      >= 0.4.2   && < 0.5
                     , criterion        >= 1.1.1   && < 1.2
                     , deepseq          >= 1.4.1   && < 1.5
+                    , store            >= 0.2.0.0 && < 0.3
+                    , th-utilities     >= 0.1.0   && < 0.2
   default-extensions:   DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances

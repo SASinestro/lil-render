@@ -45,10 +45,10 @@ class ImageConvertible a where
 data ImageFormat = TGA
 
 readImage :: ImageFormat -> FilePath -> IO Image
-readImage TGA path = liftM toImage $ read_tga path
+readImage TGA path = liftM toImage $ readTGA path
 
 writeImage :: ImageFormat -> FilePath -> Image -> IO ()
-writeImage TGA path img = write_tga path $ fromImage img
+writeImage TGA path img = writeTGA path $ fromImage img
 
 makeImage :: Int -> Int -> RGBColor -> Image
 makeImage width height color = Image {
@@ -59,16 +59,15 @@ makeImage width height color = Image {
 
 
 instance ImageConvertible TGAImage where
-    toImage tga = Image storage height width
+    toImage (TGAImage TGAHeader { _tgaHeight = height, _tgaWidth = width } color_map image_data) = Image storage height' width'
         where
-            height = fromIntegral . fromLE $ tga ^. tga_header . tga_height
-            width  = fromIntegral . fromLE $ tga ^. tga_header . tga_width
-            color_map = tga ^. tga_color_map
-            storage = V.fromList $ case tga ^. tga_image_data of
-                (TGAIndexedData indexes) -> fmap (\index -> color_map ! fromIntegral index) indexes
+            height' = fromIntegral height
+            width'  = fromIntegral width
+            storage = case image_data of
+                (TGAIndexedData indexes) -> fmap ((color_map !) . fromIntegral) indexes
                 (TGAUnmappedData colors) -> colors
-    fromImage image = TGAImage {
-          _tga_header = simple_tga_header (_width image) (_height image)
-        , _tga_color_map = V.empty
-        , _tga_image_data = TGAUnmappedData $ V.toList (_storage image)
+    fromImage (Image storage width height) = TGAImage {
+          _tgaHeader    = simpleTGAHeader width height
+        , _tgaColorMap  = V.empty
+        , _tgaImageData = TGAUnmappedData storage
     }

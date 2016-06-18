@@ -116,10 +116,7 @@ data TGAImage = TGAImage {
 
 depthToBytes :: Int -> Int
 depthToBytes  0 = 0
-depthToBytes 15 = 2
-depthToBytes 16 = 2
 depthToBytes 24 = 3
-depthToBytes 32 = 4
 depthToBytes _  = error "Unsupported pixel format."
 
 readTGA :: FilePath -> IO TGAImage
@@ -211,54 +208,12 @@ instance Store TGAImage where
 
         return $ TGAImage header colorMap imageData
         where
-            -- Don't ask me, I'm just a girl!
-            fiveBitToEightBit five = (five * 527 + 23) `shiftR` 6
-
             peekColor :: Word8 -> Peek RGBColor
-            peekColor 15 = do
-                byte1 <- peek
-                byte2 <- peek
-
-                let blue' = byte1 .&. 0x1F
-                let green' = ((byte2 `shiftL` 3) .&. 0x1C) .|. ((byte1 `shiftR` 5) .&. 0x07)
-                let red' = (byte2 `shiftR` 2) .&. 0x1F
-
-                let alpha = 255
-                let red = fiveBitToEightBit red'
-                let green = fiveBitToEightBit green'
-                let blue = fiveBitToEightBit blue'
-                return $ RGBColor red green blue alpha
-            peekColor 16 = do
-                byte1 <- peek
-                byte2 <- peek
-
-                let blue' = byte1 .&. 0x1F
-                let green' = ((byte2 `shiftL` 3) .&. 0x1C) .|. ((byte1 `shiftR` 5) .&. 0x07)
-                let red' = (byte2 `shiftR` 2) .&. 0x1F
-
-                let alpha = 255 * (byte2 .&. 0x80) `shiftR` 7
-                let red = fiveBitToEightBit red'
-                let green = fiveBitToEightBit green'
-                let blue = fiveBitToEightBit blue'
-                return $ RGBColor red green blue alpha
             peekColor 24 = do
                 blue <- peek
                 green <- peek
                 red <- peek
-                return $ RGBColor red green blue 255
-            peekColor 32 = do
-                blue' <- peek :: Peek Word8
-                green' <- peek :: Peek Word8
-                red' <- peek :: Peek Word8
-                alpha' <- peek :: Peek Word8
-
-                let alpha = fromIntegral alpha' :: Double
-
-                let red = round $ alpha * fromIntegral red'
-                let green = round $ alpha * fromIntegral green'
-                let blue = round $ alpha * fromIntegral blue'
-
-                return $ RGBColor red green blue alpha'
+                return $ RGBColor red green blue
             peekColor _ = fail "Unsupported pixel format."
 
     poke (TGAImage {
@@ -279,47 +234,12 @@ instance Store TGAImage where
         pokeImageData bitDepth imageData
 
         where
-            -- 'what the fuck?' is both appropriate and a good reference here!
-            eightBitToFiveBit :: Word8 -> Word16 -- Bullshit to make the types line up right, don't question it.
-            eightBitToFiveBit eight = ((fromIntegral eight :: Word16) * 249 + 1014) `shiftR` 11
-
-            deblendAlpha :: RGBColor -> RGBColor
-            deblendAlpha (RGBColor r g b a) = RGBColor r' g' b' a
-                where
-                    a' = (fromIntegral a :: Double) / 255
-                    r' = round $ (fromIntegral r / a')
-                    g' = round $ (fromIntegral g / a')
-                    b' = round $ (fromIntegral b / a')
-
             pokeColor :: Word8 -> RGBColor -> Poke ()
-            pokeColor depth = pokeColor' depth . deblendAlpha
-
-            pokeColor' :: Word8 -> RGBColor -> Poke ()
-            pokeColor' 15 (RGBColor r g b _) = do
-                let red' = eightBitToFiveBit r
-                let green' = eightBitToFiveBit g
-                let blue' = eightBitToFiveBit b
-
-                let outpoke = red' + (green' `shiftL` 5) + (blue' `shiftL` 10)
-                poke outpoke
-            pokeColor' 16 (RGBColor r g b a) = do
-                let red' = eightBitToFiveBit r
-                let green' = eightBitToFiveBit g
-                let blue' = eightBitToFiveBit b
-                let alpha' = if a >= 128 then 1 else 0
-
-                let outpoke = red' + (green' `shiftL` 5) + (blue' `shiftL` 10) + (alpha' `shiftL` 15)
-                poke outpoke
-            pokeColor' 24 (RGBColor r g b _) = do
+            pokeColor 24 (RGBColor r g b) = do
                 poke b
                 poke g
                 poke r
-            pokeColor' 32 (RGBColor r g b a) = do
-                poke b
-                poke g
-                poke r
-                poke a
-            pokeColor' _ _ = fail "Unsupported pixel format."
+            pokeColor _ _ = fail "Unsupported pixel format."
 
             pokeImageData :: Word8 -> TGAImageData -> Poke ()
             pokeImageData _ (TGAIndexedData indexes) = V.mapM_ poke indexes

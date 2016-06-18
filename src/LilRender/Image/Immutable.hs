@@ -5,6 +5,7 @@ module LilRender.Image.Immutable (
     , ImageConvertible
     , toImage
     , fromImage
+    , makeImage
 ) where
 
 import           Control.DeepSeq
@@ -34,3 +35,11 @@ Image { _storage = storage,  _width = width } <!> (Screen (Point2 x y)) = storag
 class ImageConvertible a where
     toImage :: a -> Image
     fromImage :: Image -> a
+
+
+makeImage :: Int -> Int -> RGBColor -> Image
+makeImage width height color = Image {
+      _storage = V.replicate (width * height) color
+    , _width = width
+    , _height = height
+}

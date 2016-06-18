@@ -9,15 +9,15 @@ import           LilRender.Math.Geometry
 import           LilRender.Math.Transform
 import           LilRender.Math.Vector
 import           LilRender.Model
-import LilRender.Texture
 import           LilRender.Shader
+import           LilRender.Texture
 
 import           Control.Monad.Primitive
 import qualified Data.Vector.Unboxed.Mutable as MV
 
 data GouraudShader st = GouraudShader {
-      _gouraudStateVector       :: MV.MVector st Double
-    , _gouraudLightingDirection :: World (Vector3 Double)
+      _gouraudStateVector           :: MV.MVector st Double
+    , _gouraudLightingDirection     :: World (Vector3 Double)
     , _gouraudModelToWorldTransform :: Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double))
 }
 
@@ -39,8 +39,8 @@ gouraudShader dir modelToWorld = do
     return $ GouraudShader state dir modelToWorld
 
 data PhongShader st = PhongShader {
-      _phongStateVector       :: MV.MVector st (Double, Point2 Double)
-    , _phongLightingDirection :: World (Vector3 Double)
+      _phongStateVector           :: MV.MVector st (Double, Point2 Double)
+    , _phongLightingDirection     :: World (Vector3 Double)
     , _phongModelToWorldTransform :: Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double))
 }
 

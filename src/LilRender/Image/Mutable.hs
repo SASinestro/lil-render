@@ -41,7 +41,7 @@ drawPixel :: PrimMonad m => MutableImage (PrimState m) -> ZBufferIndexType -> RG
 drawPixel (MutableImage mStorage zBuffer width _) (Screen (Point3 x y z)) color = do
     oldZ <- MV.read zBuffer idx
     when (oldZ < z) $ do
-        MV.write mStorage idx color
-        MV.write zBuffer idx z
+        MV.unsafeWrite mStorage idx color
+        MV.unsafeWrite zBuffer idx z
         where
             idx = width * y + x

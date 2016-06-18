@@ -4,27 +4,24 @@ module LilRender.Model (
     , VertexNormal(..)
     , Vertex(..)
     , Face(..)
-    , Model(..)) where
+    , faceToTriangle
+    , Model
+    , ModelFormat(..)
+    , loadModel) where
 
-import qualified Data.Vector             as V
-import           LilRender.Math.Geometry
-import           LilRender.Math.Vector
+import LilRender.Model.Internal
+import LilRender.Model.Wavefront
 
+import LilRender.Math.Geometry
 
-newtype VertexPoint = VertexPoint { unwrapVertexPoint :: World (Point3 Double) } deriving (Show, Eq)
-newtype TextureCoordinate = TextureCoordinate { unwrapTextureCoordinate :: Point2 Double } deriving (Show, Eq)
-newtype VertexNormal = VertexNormal { unwrapVertexNormal :: World (Vector3 Double) } deriving (Show, Eq)
+data ModelFormat = WavefrontOBJ
 
-data Vertex = Vertex {
-                point             :: VertexPoint
-              , textureCoordinate :: Maybe TextureCoordinate
-              , vertexNormal      :: Maybe VertexNormal
-        } deriving (Eq, Show)
+loadModel :: ModelFormat -> FilePath -> IO Model
+loadModel WavefrontOBJ = loadWavefrontObj
 
-data Face = Face {
-        firstVertex, secondVertex, thirdVertex :: !Vertex
-} deriving (Eq, Show)
-
-newtype Model = Model {
-      faces :: V.Vector Face
-} deriving (Eq, Show)
+faceToTriangle :: Face -> Triangle (ModelSpace (Point3 Double))
+faceToTriangle (Face
+                (Vertex (VertexPoint p1) _ _)
+                (Vertex (VertexPoint p2) _ _)
+                (Vertex (VertexPoint p3) _ _)
+               ) = Triangle p1 p2 p3

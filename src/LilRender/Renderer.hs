@@ -1,51 +1,38 @@
-module LilRender.Renderer where
+module LilRender.Renderer (drawTexturedModel) where
 
 import Control.Monad
 import Control.Monad.Primitive
-import Data.Maybe
 
-import LilRender.Image
-import LilRender.Image.Color
 import LilRender.Image.DrawingPrimitives
 import LilRender.Image.Mutable
-import LilRender.Image.Texture
-
-import LilRender.Model
-
 import LilRender.Math.Geometry
-import LilRender.Math.Matrix
-import LilRender.Math.Matrix.Transform
-import LilRender.Math.Vector
+import LilRender.Math.Transform
+import LilRender.Model.Internal
+import LilRender.Shader
+import LilRender.Texture
 
-pointToTextureCoords :: TextureCoordinate -> TextureCoordinate -> TextureCoordinate -> Barycentric (Point3 Double) -> TextureCoordinate
-pointToTextureCoords (TextureCoordinate (Point2 t1x t1y)) (TextureCoordinate (Point2 t2x t2y)) (TextureCoordinate (Point2 t3x t3y)) bary = TextureCoordinate (Point2 x y)
+drawTexturedModel :: forall m shader. (PrimMonad m, Shader shader) =>
+                    MutableImage (PrimState m) -- Target
+                    -> Model -- The model to be rendered
+                    -> Texture -- The texture
+                    -> shader (PrimState m) -- The shader
+                    -> Transform (ModelSpace (Point3 Double)) (Screen (Point3 Double)) -- The projection from ModelSpace to Screen
+                    -> m ()
+drawTexturedModel image (Model faces) texture shader projection =
+    forM_ faces (\face -> do
+        tri <- screenTriangleForFace face
+        color <- fragmentShader shader texture
+        drawFilledTriangle image color tri
+    )
     where
-        x = triangularInterpolate (Triangle t1x t2x t3x) bary
-        y = triangularInterpolate (Triangle t2y t2y t3y) bary
+        screenTriangleForFace :: Face -> m (Triangle (Screen (Point3 Double)))
+        screenTriangleForFace (Face v1 v2 v3) = do
+            (Vertex (VertexPoint p1) _ _) <- vertexShader shader v1
+            (Vertex (VertexPoint p2) _ _) <- vertexShader shader v2
+            (Vertex (VertexPoint p3) _ _) <- vertexShader shader v3
 
-drawTexturedModel :: forall m. (PrimMonad m) => MutableImage (PrimState m) -- Target
-                                             -> Model -- The model to be rendered
-                                             -> Transform -- Matrix to transform world coordinates into screen coordinates
-                                             -> Texture -- The texture
-                                             -> (Face -> Barycentric (Point3 Double) -> RGBColor -> m RGBColor) -- For lighting, etc
-                                             -> m ()
-drawTexturedModel image model projection texture colorMutator =
-    mapM_ (\face -> drawFilledTriangle image (getTextureColor face) (screenTriangleForFace face)) $ faces model
-    where
-        screenTriangleForFace :: Face -> Triangle (Screen (Point3 Double))
-        screenTriangleForFace face = Triangle p1 p2 p3
-            where
-                (Face
-                    (Vertex (VertexPoint (World p1')) _ _)
-                    (Vertex (VertexPoint (World p2')) _ _)
-                    (Vertex (VertexPoint (World p3')) _ _)) = face
-                p1 = Screen $ transform3DPoint projection p1'
-                p2 = Screen $ transform3DPoint projection p2'
-                p3 = Screen $ transform3DPoint projection p3'
+            let p1' = transform projection p1
+            let p2' = transform projection p2
+            let p3' = transform projection p3
 
-        getTextureColor :: Face -> Barycentric (Point3 Double) -> m RGBColor
-        getTextureColor face barycentric = colorMutator face barycentric . getColorFromTexture texture $ pointToTextureCoords t1 t2 t3 barycentric
-            where
-                (Face (Vertex _ (Just t1) _)
-                      (Vertex _ (Just t2) _)
-                      (Vertex _ (Just t3) _)) = face
+            return $ Triangle p1' p2' p3'

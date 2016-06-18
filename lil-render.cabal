@@ -4,32 +4,35 @@ synopsis:             The worst 3D renderer ever created.
 -- description:
 -- license:
 -- license-file:
-homepage:             
+homepage:
 author:               Jon Williams
 maintainer:           sasinestro@gmail.com
-category:             
+category:
 -- copyright:
 build-type:           Simple
 cabal-version:        >=1.10
 
 library
-    exposed-modules:    LilRender.Image
-                      , LilRender.Image.TGA
-                      , LilRender.Image.Texture
-                      , LilRender.Image.Mutable
-                      , LilRender.Image.DrawingPrimitives
-                      , LilRender.Image.Color
-                      , LilRender.Image.NamedColors
-
-                      , LilRender.Model
-                      , LilRender.Model.Wavefront
-
+    exposed-modules:    LilRender.Color
+                      , LilRender.Color.Named
+                      , LilRender.Image
                       , LilRender.Math.Geometry
                       , LilRender.Math.Matrix
-                      , LilRender.Math.Matrix.Transform
+                      , LilRender.Math.Transform
                       , LilRender.Math.Vector
-
+                      , LilRender.Model
+                      , LilRender.Texture
                       , LilRender.Renderer
+                      , LilRender.Shader
+                      , LilRender.Shader.Library
+
+    other-modules:      LilRender.Image.DrawingPrimitives
+                      , LilRender.Image.Format.TGA
+                      , LilRender.Image.Mutable
+                      , LilRender.Image.Immutable
+                      , LilRender.Model.Internal
+                      , LilRender.Model.Wavefront
+
 
     build-depends:      base             >= 4.7     && < 5
                       , bytestring       >= 0.10.6  && < 0.11
@@ -40,6 +43,7 @@ library
                       , text             >= 1.2.2   && < 1.3
                       , store            >= 0.2.0.0 && < 0.3
                       , th-utilities     >= 0.1.0   && < 0.2
+                      , vector-th-unbox  >= 0.2.1.6 && < 0.3
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings
@@ -62,7 +66,8 @@ library
                       , OverloadedStrings
                       , ViewPatterns
                       , BangPatterns
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
+                      , UnicodeSyntax
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports
 
     hs-source-dirs:     src
     default-language:   Haskell2010
@@ -80,8 +85,9 @@ executable lil-render
                        , OverloadedStrings
                        , TypeFamilies
                        , GADTs
+                       , UnicodeSyntax
 
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports
 
     hs-source-dirs:     bin
     default-language:   Haskell2010
@@ -100,8 +106,9 @@ benchmark lil-render-bench
                        , OverloadedStrings
                        , TypeFamilies
                        , GADTs
+                       , UnicodeSyntax
 
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -main-is Bench.main
 
     hs-source-dirs:   bin
     default-language: Haskell2010

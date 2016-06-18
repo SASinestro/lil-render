@@ -9,8 +9,8 @@ module LilRender.Math.Vector (
     , normalizeVect
     ) where
 
-import Data.Function
-import Data.Monoid
+import Data.Vector.Unboxed          (Unbox)
+import Data.Vector.Unboxed.Deriving
 
 data Vector2 a = Vector2 {
       v2_x :: !a
@@ -22,6 +22,16 @@ data Vector3 a = Vector3 {
     , v3_y :: !a
     , v3_z :: !a
 } deriving (Show, Eq, Functor, Foldable)
+
+derivingUnbox "Vector2"
+    [t| forall a. (Unbox a) => Vector2 a -> (a, a) |]
+    [| \(Vector2 x y) -> (x, y) |]
+    [| \(x, y) -> (Vector2 x y) |]
+
+derivingUnbox "Vector3"
+    [t| forall a. (Unbox a) => Vector3 a -> (a, a, a) |]
+    [| \(Vector3 x y z) -> (x, y, z) |]
+    [| \(x, y, z) -> (Vector3 x y z) |]
 
 instance (Num a) => Monoid (Vector2 a) where
     mempty = zeroVect
@@ -48,7 +58,6 @@ instance (Num a) => Num (Vector3 a) where
     abs = fmap abs
     signum = fmap signum
     fromInteger i = fromInteger <$> Vector3 i i i
-
 
 class (Num a) => VectorMath v a where
     zeroVect  :: v a

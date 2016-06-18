@@ -1,80 +1,45 @@
 module Main where
 
-import           Control.DeepSeq                 (force)
-import           Control.Exception               (evaluate)
-import           Control.Monad
-import           Criterion.Measurement           (getTime, initializeTime, secs)
-import           Data.Foldable                   (toList)
+import qualified LilRender.Color.Named as NC
+import LilRender.Image
+import LilRender.Model
+import LilRender.Renderer
+import LilRender.Shader.Library
+import LilRender.Texture
+import LilRender.Math.Geometry
+import LilRender.Math.Vector
+import LilRender.Math.Transform
 
-import           LilRender.Image
-import           LilRender.Image.Color
-import           LilRender.Image.Mutable         (freezeImage, thawImage)
-import qualified LilRender.Image.NamedColors     as NC
-import           LilRender.Image.Texture         (Texture, loadTexture)
-import           LilRender.Math.Geometry
-import           LilRender.Math.Matrix
-import           LilRender.Math.Matrix.Transform (viewportTransform)
-import           LilRender.Math.Vector
-import           LilRender.Model
-import           LilRender.Model.Wavefront
-import           LilRender.Renderer
+width = 800
+height = 800
 
-lightIntensityAtPointOnFace :: Vector3 Double -> Face -> Barycentric (Point3 Double) -> Double
-lightIntensityAtPointOnFace lightDirection face = triangularInterpolate (Triangle i1 i2 i3)
+lightDirection = World (Vector3 1.0 1.0 1.0)
+
+center :: Int -> Int -> Screen (Point2 Int)
+center width height = Screen (Point2 x y)
     where
-        (Face (Vertex _ _ (Just (VertexNormal (World n1))))
-              (Vertex _ _ (Just (VertexNormal (World n2))))
-              (Vertex _ _ (Just (VertexNormal (World n3))))) = face
-        i1 = n1 `dotVect` lightDirection
-        i2 = n2 `dotVect` lightDirection
-        i3 = n3 `dotVect` lightDirection
+        x = round ((fromIntegral width) / 8)
+        y = round ((fromIntegral height) / 8)
 
-
-lookAt eye center up =
-    identityMatrix 4 `mUpdate` concat [ [ ((1, i), x' !! (i - 1)),
-                                          ((2, i), y' !! (i - 1)),
-                                          ((3, i), z' !! (i - 1)),
-                                          ((i, 4), 0            )  ] | i <- [1 .. 3] ]
-    where
-        z  = normalizeVect $ eye - center
-        z' = toList z
-        x  = normalizeVect (up `crossVect` z)
-        x' = toList x
-        y  = normalizeVect (z `crossVect` x)
-        y' = toList y
-
-eye = Vector3 1 1 3
-center = Vector3 0 0 0
-up = Vector3 0 1 0
-
-viewPort w h scale = viewportTransform (Point2 (round $ width / 8) (round $ height / 8)) (round $ scale * width) (round $ scale * height) 255
-    where
-        width = fromIntegral w :: Double
-        height = fromIntegral h :: Double
-projection = identityMatrix 4 `mUpdate` [((4, 3), -1 / magnitudeVect eye)]
-look = lookAt eye center up
-toScreenCoords w h = viewPort w h 0.75 `mMult` projection `mMult` look
-
-lightingDirection = normalizeVect $ Vector3 1 (-1) 1
-lightAt = lightIntensityAtPointOnFace lightingDirection
-
-drawModel :: Int -> Int -> Model -> Texture -> IO Image
-drawModel width height !model !texture = do
-    image <- thawImage $ makeImage width height NC.red
-    drawTexturedModel image model (toScreenCoords width height) texture (\face point color -> return . scaleColor NC.white $ lightAt face point)
-    freezeImage image
+scale' :: Double -> (Int -> Int)
+scale' factor a = a'
+    where a' = round ((fromIntegral a) * factor)
 
 main :: IO ()
 main = do
-    model <- loadWavefrontObj "data/african_head/african_head.obj"
-    texture <- loadTexture "data/african_head/african_head_diffuse.tga"
+    model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
+    texture <- loadTexture TGA "data/african_head/african_head_diffuse.tga"
 
-    initializeTime
+    let cameraLocation = World (Point3 1.0 1.0 3.0)
+    let cameraTarget   = World (Point3 0.0 0.0 0.0)
+    let camera = cameraTransform cameraLocation cameraTarget
 
-    startTime <- getTime
-    img <- drawModel 400 400 model texture
-    endTime <- getTime
+    let scale = scale' (3/4)
+    let viewport = viewportTransform (Screen (Point2 100 100)) 600 600
 
-    putStrLn $ "Frame time: " ++ secs (endTime - startTime)
+    let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> orthographicProjectionTransform >>> viewport
 
-    writeImage TGA "head.tga" img
+    shader <- gouraudShader lightDirection identityTransform
+
+    image <- drawImageWith width height NC.black (\image -> drawTexturedModel image model texture shader modelToScreen)
+    saveImage TGA "head.tga" image

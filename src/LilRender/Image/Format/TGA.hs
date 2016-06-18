@@ -1,4 +1,4 @@
-module LilRender.Image.TGA (
+module LilRender.Image.Format.TGA (
       TGAHeader(..)
     , simpleTGAHeader
     , TGAImageType(..)
@@ -13,14 +13,16 @@ module LilRender.Image.TGA (
 
 import           Control.Monad
 import           Data.Bits
-import qualified Data.ByteString       as BS
-import           Data.Int
-import qualified Data.Vector           as V
+import qualified Data.ByteString           as BS
+import           Data.Vector.Unboxed       ((!))
+import qualified Data.Vector.Unboxed       as V
 import           Data.Word
-import           LilRender.Image.Color
+
+import           LilRender.Color
+import           LilRender.Image.Immutable
 
 import           Data.Store
-import           Data.Store.Internal   (skip)
+import           Data.Store.Internal       (skip)
 import           TH.Derive
 
 data TGAHeader = TGAHeader {
@@ -30,8 +32,8 @@ data TGAHeader = TGAHeader {
     , _tgaColorMapOffset  :: Word16
     , _tgaColorMapLength  :: Word16
     , _tgaColorMapDepth   :: Word8
-    , _tgaX_origin        :: Word16
-    , _tgaY_origin        :: Word16
+    , _tgaXOrigin         :: Word16
+    , _tgaYOrigin         :: Word16
     , _tgaWidth           :: Word16
     , _tgaHeight          :: Word16
     , _tgaBitDepth        :: Word8
@@ -47,8 +49,8 @@ simpleTGAHeader width height = TGAHeader {
     , _tgaColorMapOffset = 0
     , _tgaColorMapLength = 0
     , _tgaColorMapDepth  = 0
-    , _tgaX_origin = 0
-    , _tgaY_origin = 0
+    , _tgaXOrigin = 0
+    , _tgaYOrigin = 0
     , _tgaWidth = fromIntegral width
     , _tgaHeight = fromIntegral height
     , _tgaBitDepth = 24
@@ -146,6 +148,20 @@ readTGA path = do
 writeTGA :: FilePath -> TGAImage -> IO ()
 writeTGA path = BS.writeFile path . encode
 
+instance ImageConvertible TGAImage where
+    toImage (TGAImage TGAHeader { _tgaHeight = height, _tgaWidth = width } color_map image_data) = Image storage height' width'
+        where
+            height' = fromIntegral height
+            width'  = fromIntegral width
+            storage = case image_data of
+                (TGAIndexedData indexes) -> V.map ((color_map !) . fromIntegral) indexes
+                (TGAUnmappedData colors) -> colors
+    fromImage (Image storage width height) = TGAImage {
+          _tgaHeader    = simpleTGAHeader width height
+        , _tgaColorMap  = V.empty
+        , _tgaImageData = TGAUnmappedData storage
+    }
+
 
 type TGAColorMap = V.Vector RGBColor
 type TGAColorMapIndex = Word8 -- At least for the files I'm looking at
@@ -231,11 +247,18 @@ instance Store TGAImage where
                 red <- peek
                 return $ RGBColor red green blue 255
             peekColor 32 = do
-                blue <- peek
-                green <- peek
-                red <- peek
-                alpha <- peek
-                return $ RGBColor red green blue alpha
+                blue' <- peek :: Peek Word8
+                green' <- peek :: Peek Word8
+                red' <- peek :: Peek Word8
+                alpha' <- peek :: Peek Word8
+
+                let alpha = fromIntegral alpha' :: Double
+
+                let red = round $ alpha * fromIntegral red'
+                let green = round $ alpha * fromIntegral green'
+                let blue = round $ alpha * fromIntegral blue'
+
+                return $ RGBColor red green blue alpha'
             peekColor _ = fail "Unsupported pixel format."
 
     poke (TGAImage {
@@ -251,7 +274,7 @@ instance Store TGAImage where
 
         replicateM_ (fromIntegral colorMapOffset) $ poke (0 :: Word8)
 
-        when hasColorMap $ mapM_ (pokeColor bitDepth) colorMap
+        when hasColorMap $ V.mapM_ (pokeColor bitDepth) colorMap
 
         pokeImageData bitDepth imageData
 
@@ -260,15 +283,26 @@ instance Store TGAImage where
             eightBitToFiveBit :: Word8 -> Word16 -- Bullshit to make the types line up right, don't question it.
             eightBitToFiveBit eight = ((fromIntegral eight :: Word16) * 249 + 1014) `shiftR` 11
 
+            deblendAlpha :: RGBColor -> RGBColor
+            deblendAlpha (RGBColor r g b a) = RGBColor r' g' b' a
+                where
+                    a' = (fromIntegral a :: Double) / 255
+                    r' = round $ (fromIntegral r / a')
+                    g' = round $ (fromIntegral g / a')
+                    b' = round $ (fromIntegral b / a')
+
             pokeColor :: Word8 -> RGBColor -> Poke ()
-            pokeColor 15 (RGBColor r g b _) = do
+            pokeColor depth = pokeColor' depth . deblendAlpha
+
+            pokeColor' :: Word8 -> RGBColor -> Poke ()
+            pokeColor' 15 (RGBColor r g b _) = do
                 let red' = eightBitToFiveBit r
                 let green' = eightBitToFiveBit g
                 let blue' = eightBitToFiveBit b
 
                 let outpoke = red' + (green' `shiftL` 5) + (blue' `shiftL` 10)
                 poke outpoke
-            pokeColor 16 (RGBColor r g b a) = do
+            pokeColor' 16 (RGBColor r g b a) = do
                 let red' = eightBitToFiveBit r
                 let green' = eightBitToFiveBit g
                 let blue' = eightBitToFiveBit b
@@ -276,17 +310,17 @@ instance Store TGAImage where
 
                 let outpoke = red' + (green' `shiftL` 5) + (blue' `shiftL` 10) + (alpha' `shiftL` 15)
                 poke outpoke
-            pokeColor 24 (RGBColor r g b _) = do
+            pokeColor' 24 (RGBColor r g b _) = do
                 poke b
                 poke g
                 poke r
-            pokeColor 32 (RGBColor r g b a) = do
+            pokeColor' 32 (RGBColor r g b a) = do
                 poke b
                 poke g
                 poke r
                 poke a
-            pokeColor _ _ = fail "Unsupported pixel format."
+            pokeColor' _ _ = fail "Unsupported pixel format."
 
             pokeImageData :: Word8 -> TGAImageData -> Poke ()
-            pokeImageData _ (TGAIndexedData indexes) = mapM_ poke indexes
-            pokeImageData depth (TGAUnmappedData colors) = mapM_ (pokeColor depth) colors
+            pokeImageData _ (TGAIndexedData indexes) = V.mapM_ poke indexes
+            pokeImageData depth (TGAUnmappedData colors) = V.mapM_ (pokeColor depth) colors

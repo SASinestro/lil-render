@@ -1,6 +1,4 @@
-module Main where
-
-
+module Bench where
 
 main :: IO ()
 main = undefined

@@ -7,6 +7,7 @@ module LilRender.Image.Format.TGA (
     , TGAImageDescriptor(..)
     , TGAImage(..)
     , readTGA
+    , readTGAIO
     , writeTGA
     , TGAImageData(..)
 ) where
@@ -119,27 +120,32 @@ depthToBytes  0 = 0
 depthToBytes 24 = 3
 depthToBytes _  = error "Unsupported pixel format."
 
-readTGA :: FilePath -> IO TGAImage
-readTGA path = do
+readTGAIO :: FilePath -> IO TGAImage
+readTGAIO path = do
     contents <- BS.readFile path
-    let (Right (TGAHeader {
-          _tgaWidth = width'
-        , _tgaHeight = height'
-        , _tgaBitDepth = bitDepth'
-        , _tgaColorMapLength = colorMapLength'
-        , _tgaColorMapDepth = colorMapDepth'
-        , _tgaColorMapOffset = colorMapOffset'
-    })) = decode $ BS.take 18 {- Size of TGA header -} contents :: Either PeekException TGAHeader
+    return $ readTGA contents
 
-    let width = fromIntegral width' :: Int
-    let height = fromIntegral height' :: Int
-    let bitDepth = fromIntegral bitDepth' :: Int
-    let colorMapLength = fromIntegral colorMapLength' :: Int
-    let colorMapDepth = fromIntegral colorMapDepth' :: Int
-    let colorMapOffset = fromIntegral colorMapOffset' :: Int
+readTGA :: BS.ByteString -> TGAImage
+readTGA contents = image
+    where
+        (Right (TGAHeader {
+              _tgaWidth = width'
+            , _tgaHeight = height'
+            , _tgaBitDepth = bitDepth'
+            , _tgaColorMapLength = colorMapLength'
+            , _tgaColorMapDepth = colorMapDepth'
+            , _tgaColorMapOffset = colorMapOffset'
+        })) = decode $ BS.take 18 {- Size of TGA header -} contents :: Either PeekException TGAHeader
 
-    let size = fromIntegral (18 + colorMapOffset + (colorMapLength * depthToBytes colorMapDepth) + (width * height * depthToBytes bitDepth)) :: Int
-    decodeIO $ BS.take size contents
+        width = fromIntegral width' :: Int
+        height = fromIntegral height' :: Int
+        bitDepth = fromIntegral bitDepth' :: Int
+        colorMapLength = fromIntegral colorMapLength' :: Int
+        colorMapDepth = fromIntegral colorMapDepth' :: Int
+        colorMapOffset = fromIntegral colorMapOffset' :: Int
+
+        size = fromIntegral (18 + colorMapOffset + (colorMapLength * depthToBytes colorMapDepth) + (width * height * depthToBytes bitDepth)) :: Int
+        (Right image) = decode $ BS.take size contents
 
 
 writeTGA :: FilePath -> TGAImage -> IO ()

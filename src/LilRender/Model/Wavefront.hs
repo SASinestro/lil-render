@@ -95,14 +95,11 @@ faceResolver vert text norm = fmap faceResolver'
         lookup list idx = list V.! (idx - 1)
         flookup list idx = (list V.!) . (+ (-1)) <$> idx
 
-loadWavefrontObj :: FilePath -> IO Model
-loadWavefrontObj path = do
-    obj <- readFile path
-    let ls = T.lines . T.pack $ obj
-
-    let v = vertices ls
-    let t = textureCoords ls
-    let n = vertexNormals ls
-    let u = unresolvedFaces ls
-
-    return . Model $ faceResolver v t n u
+loadWavefrontObj :: T.Text -> Model
+loadWavefrontObj obj = Model $ faceResolver v t n u
+    where
+        ls = T.lines obj
+        v = vertices ls
+        t = textureCoords ls
+        n = vertexNormals ls
+        u = unresolvedFaces ls

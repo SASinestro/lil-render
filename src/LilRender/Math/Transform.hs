@@ -18,13 +18,16 @@ module LilRender.Math.Transform (
     , viewportTransform
 ) where
 
+import           Control.DeepSeq
 import qualified Data.Vector.Generic     as V
+import           GHC.Generics
 
 import           LilRender.Math.Geometry
 import           LilRender.Math.Matrix
 import           LilRender.Math.Vector
 
-data Transform a b = Transform (Matrix Double) deriving (Show, Eq)
+data Transform a b = Transform (Matrix Double) deriving (Show, Eq, Generic)
+instance NFData (Transform a b)
 
 class Transformable a where
     toMatrix :: a -> Matrix Double

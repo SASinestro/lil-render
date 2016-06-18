@@ -9,19 +9,23 @@ module LilRender.Math.Vector (
     , normalizeVect
     ) where
 
+import Control.DeepSeq
 import Data.Vector.Unboxed          (Unbox)
 import Data.Vector.Unboxed.Deriving
+import GHC.Generics
 
 data Vector2 a = Vector2 {
       v2_x :: !a
     , v2_y :: !a
-} deriving (Show, Eq, Functor, Foldable)
+} deriving (Show, Eq, Functor, Foldable, Generic)
+instance (NFData a) => NFData (Vector2 a)
 
 data Vector3 a = Vector3 {
       v3_x :: !a
     , v3_y :: !a
     , v3_z :: !a
-} deriving (Show, Eq, Functor, Foldable)
+} deriving (Show, Eq, Functor, Foldable, Generic)
+instance (NFData a) => NFData (Vector3 a)
 
 derivingUnbox "Vector2"
     [t| forall a. (Unbox a) => Vector2 a -> (a, a) |]

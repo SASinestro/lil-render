@@ -7,9 +7,12 @@ module LilRender.Math.Matrix (
     , identityMatrix
 )where
 
-import           Control.Arrow       (first)
-import qualified Data.Ix             as Ix
-import qualified Data.Vector.Unboxed as V
+import           Control.Arrow   (first)
+import           Control.DeepSeq
+import qualified Data.Ix         as Ix
+import           Data.Vector     ((!), (//))
+import qualified Data.Vector     as V
+import           GHC.Generics
 
 data Matrix a = Matrix {
           _mStorage :: V.Vector a
@@ -17,9 +20,12 @@ data Matrix a = Matrix {
         , _mRows    :: Int
     }
 
-deriving instance (Eq a, V.Unbox a) => Eq (Matrix a)
+deriving instance (Eq a) => Eq (Matrix a)
+deriving instance (Generic a) => Generic (Matrix a)
+instance (NFData a, Generic a) => NFData (Matrix a)
+deriving instance Functor Matrix
 
-instance (Show a, V.Unbox a) => Show (Matrix a) where
+instance (Show a) => Show (Matrix a) where
     show mat@(Matrix _ w h) = foldl (++) header $ line <$> grid w h
         where
             grid :: Int -> Int -> [[ (Int, Int) ]]
@@ -31,20 +37,20 @@ instance (Show a, V.Unbox a) => Show (Matrix a) where
             line (idx:idxs) = foldl (\accum x -> accum ++ " " ++ show (mat `mIndex` x)) ("    | " ++ show (mat `mIndex` idx)) idxs ++ " |\n"
 
 {-# INLINE mIndex #-}
-mIndex :: (V.Unbox a) => Matrix a -> (Int, Int) -> a
-(Matrix storage cols _) `mIndex` (x', y') = storage `V.unsafeIndex` (cols * y + x)
+mIndex :: Matrix a -> (Int, Int) -> a
+(Matrix storage cols _) `mIndex` (x', y') = storage ! (cols * y + x)
     where
         x = x' - 1
         y = y' - 1
 
 {-# INLINE mUpdate #-}
-mUpdate :: (V.Unbox a) => Matrix a -> [((Int, Int), a)] -> Matrix a
-mUpdate (Matrix storage cols rows) changes = Matrix (storage `V.unsafeUpd` fmap (first idx) changes) cols rows
+mUpdate :: Matrix a -> [((Int, Int), a)] -> Matrix a
+mUpdate (Matrix storage cols rows) changes = Matrix (storage // fmap (first idx) changes) cols rows
     where
         {-# INLINE idx #-}
         idx (x, y) = cols * (y - 1) + (x - 1)
 
-mMult :: (Num a, V.Unbox a) => Matrix a -> Matrix a -> Matrix a
+mMult :: (Num a) => Matrix a -> Matrix a -> Matrix a
 mMult a@(Matrix _ ax ay) b@(Matrix _ bx by)
     | ay /= bx = error $ "Matrix conformality error: trying to multiply a " ++ show ax ++ "x" ++ show ay
                                                        ++ " matrix with a " ++ show bx ++ "x" ++ show by ++ " matrix."
@@ -53,7 +59,7 @@ mMult a@(Matrix _ ax ay) b@(Matrix _ bx by)
                                                                                      i <- [1 .. ax]]) ax by
 
 
-mTranspose :: (V.Unbox a) => Matrix a -> Matrix a
+mTranspose :: Matrix a -> Matrix a
 mTranspose mat@(Matrix _ cols rows) = Matrix (V.fromList [mat `mIndex` (i, j) | i <- [1 .. cols], j <- [1 .. rows] ]) rows cols
 
 --
@@ -64,7 +70,7 @@ mTranspose mat@(Matrix _ cols rows) = Matrix (V.fromList [mat `mIndex` (i, j) | 
 --         width  = length $ head lol
 --         height = length lol
 
-identityMatrix :: (Num a, V.Unbox a) => Int -> Matrix a
+identityMatrix :: (Num a) => Int -> Matrix a
 identityMatrix 4 = Matrix (V.fromList [1, 0, 0, 0,
                                        0, 1, 0, 0,
                                        0, 0, 1, 0,

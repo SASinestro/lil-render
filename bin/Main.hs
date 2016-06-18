@@ -1,16 +1,16 @@
 module Main where
 
-import qualified LilRender.Color.Named as NC
-import LilRender.Image
-import LilRender.Model
-import LilRender.Renderer
-import LilRender.Shader.Library
-import LilRender.Texture
-import LilRender.Math.Geometry
-import LilRender.Math.Vector
-import LilRender.Math.Transform
+import qualified LilRender.Color.Named    as NC
+import           LilRender.Image
+import           LilRender.Math.Geometry
+import           LilRender.Math.Transform
+import           LilRender.Math.Vector
+import           LilRender.Model
+import           LilRender.Renderer
+import           LilRender.Shader.Library
+import           LilRender.Texture
 
-import           Criterion.Measurement           (getTime, initializeTime, secs)
+import           Criterion.Measurement    (getTime, initializeTime, secs)
 
 width = 800
 height = 800
@@ -24,8 +24,7 @@ center width height = Screen (Point2 x y)
         y = round ((fromIntegral height) / 8)
 
 scale' :: Double -> (Int -> Int)
-scale' factor a = a'
-    where a' = round ((fromIntegral a) * factor)
+scale' factor a = round ((fromIntegral a) * factor)
 
 main :: IO ()
 main = do

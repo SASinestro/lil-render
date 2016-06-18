@@ -68,7 +68,7 @@ mTranspose mat@(Matrix _ cols rows) = Matrix (V.fromList [mat `mIndex` (i, j) | 
 
 identityMatrix :: (Num a) => Int -> Matrix a
 identityMatrix 4 = Matrix (V.fromList [1, 0, 0, 0,
-                                       0, 0, 0, 0,
+                                       0, 1, 0, 0,
                                        0, 0, 1, 0,
                                        0, 0, 0, 1 ]) 4 4
 -- identityMatrix n = matrixFrom2DList [replicate (j - 1) 0 ++ [1] ++ replicate (n - j) 0 | j <- [1 .. n]]

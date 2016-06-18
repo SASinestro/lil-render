@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
 module LilRender.Math.Transform (
       Transform
     , transform
@@ -19,8 +17,6 @@ module LilRender.Math.Transform (
     , perspectiveProjectionTransform
     , viewportTransform
 ) where
-
-import           Prelude                 hiding (id, (.))
 
 import qualified Data.Vector.Generic     as V
 
@@ -146,10 +142,7 @@ type Depth = Int
 
 viewportTransform' :: CenterPoint -> Width -> Height -> Depth -> Transform (Clip (Point3 Double)) (Screen (Point3 Double))
 viewportTransform' (Screen (Point2 x' y')) width height depth =
-    Transform $ Matrix (V.fromList [w / 2,  0,     0,     x + w / 2,
-                                    0,      h / 2, 0,     y + h / 2,
-                                    0,      0,     d / 2, d / 2,
-                                    0,      0,     0,     1         ]) 4 4
+    Transform $ Matrix (V.fromList [ w / 2,  0,  0,  0,  0,  h / 2,  0,  0,  0,  0,  d / 2,  0,  x + w / 2,  y + h / 2,  d / 2,  1 ]) 4 4
     where
         w = fromIntegral width  :: Double
         h = fromIntegral height :: Double

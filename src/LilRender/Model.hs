@@ -9,15 +9,17 @@ module LilRender.Model (
     , ModelFormat(..)
     , loadModel) where
 
-import LilRender.Model.Internal
-import LilRender.Model.Wavefront
-
-import LilRender.Math.Geometry
+import qualified Data.Text.IO              as T
+import           LilRender.Math.Geometry
+import           LilRender.Model.Internal
+import           LilRender.Model.Wavefront
 
 data ModelFormat = WavefrontOBJ
 
 loadModel :: ModelFormat -> FilePath -> IO Model
-loadModel WavefrontOBJ = loadWavefrontObj
+loadModel WavefrontOBJ path = do
+    obj <- T.readFile path
+    return $ loadWavefrontObj obj
 
 faceToTriangle :: Face -> Triangle (ModelSpace (Point3 Double))
 faceToTriangle (Face

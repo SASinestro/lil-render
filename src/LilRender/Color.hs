@@ -21,9 +21,10 @@ instance Show RGBColor where
 scaleColor ∷ RGBColor → Double → RGBColor
 scaleColor (RGBColor r g b) factor = RGBColor (round r') (round g') (round b')
     where
-        r' = factor * fromIntegral r
-        g' = factor * fromIntegral g
-        b' = factor * fromIntegral b
+        factor' = max 0 $ min 1 factor
+        r' = factor' * fromIntegral r
+        g' = factor' * fromIntegral g
+        b' = factor' * fromIntegral b
 
 --
 

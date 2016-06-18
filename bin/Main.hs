@@ -39,14 +39,14 @@ main = do
     let scale = scale' (3/4)
     let viewport = viewportTransform (center width height) (scale width) (scale height)
 
-    let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> orthographicProjectionTransform >>> viewport
+    let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> (orthographicProjectionTransform cameraLocation) >>> viewport
 
-    shader <- gouraudShader lightDirection identityTransform
+    shader <- phongShader (normalizeVect <$> lightDirection) identityTransform
 
     initializeTime
 
     startTime <- getTime
-    image <- drawImageWith width height NC.black (\image -> drawTexturedModel image model texture shader modelToScreen)
+    image <- drawImageWith width height NC.royalBlue (\image -> drawTexturedModel image model texture shader modelToScreen)
     endTime <- getTime
 
     putStrLn $ "Frame time: " ++ secs (endTime - startTime)

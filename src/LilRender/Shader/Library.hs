@@ -11,27 +11,18 @@ import           LilRender.Model
 import           LilRender.Shader
 
 import           Control.Monad.Primitive
-import           Data.Primitive.MutVar
 import qualified Data.Vector.Unboxed.Mutable as MV
 
 data GouraudShader st = GouraudShader {
       _stateVector       :: MV.MVector st Double
-    , _stateVectorIdx    :: MutVar st Int
     , _lightingDirection :: World (Vector3 Double)
     , _modelToWorldTransform :: Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double))
 }
 
 instance Shader GouraudShader where
-    vertexShader GouraudShader {   _stateVector=state
-                                  , _stateVectorIdx=idx
-                                  , _lightingDirection=(World lightDirection)
-                                  , _modelToWorldTransform=modelToWorldTransform
-                                } vertex@(Vertex _ _ (Just (VertexNormal modelNormal))) = do
-        index' <- readMutVar idx
-        let index = if index' < 3 then index' else 0
+    vertexShader (GouraudShader state (World lightDirection) modelToWorldTransform) vertex@(Vertex _ _ (Just (VertexNormal modelNormal))) nthVertex = do
         let (World worldNormal) = transform modelToWorldTransform modelNormal
-        MV.write state index (dotVect worldNormal lightDirection)
-        modifyMutVar idx (+ 1)
+        MV.write state nthVertex (dotVect worldNormal lightDirection)
         return vertex
 
     fragmentShader GouraudShader { _stateVector = state } _ = do
@@ -43,5 +34,4 @@ instance Shader GouraudShader where
 gouraudShader :: (PrimMonad m) => World (Vector3 Double) -> Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double)) -> m (GouraudShader (PrimState m))
 gouraudShader dir modelToWorld = do
     state <- MV.new 3
-    idx <- newMutVar 0
-    return $ GouraudShader state idx dir modelToWorld
+    return $ GouraudShader state dir modelToWorld

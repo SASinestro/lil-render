@@ -99,7 +99,7 @@ cameraTransform' :: (Transformable a) => CameraLocation -> CameraTarget -> World
 cameraTransform' (World (Point3 clx cly clz)) (World (Point3 ctx cty ctz)) (World up)
     = Transform $ mMult minv translate
     where
-        z @(Vector3 z1 z2 z3) = normalizeVect $ Vector3 (ctx - clx) (cty - cly) (ctz - clz) -- z is a normal vector from the camera's location to its target
+        z @(Vector3 z1 z2 z3) = normalizeVect $ Vector3 (clx - ctx) (cly - cty) (clz - ctz) -- z is a normal vector from the camera's location to its target
         x @(Vector3 x1 x2 x3) = normalizeVect $ crossVect up z
         (Vector3 y1 y2 y3)    = normalizeVect $ crossVect z x
         minv = Matrix (V.fromList [x1, y1, z1, 0,
@@ -107,7 +107,7 @@ cameraTransform' (World (Point3 clx cly clz)) (World (Point3 ctx cty ctz)) (Worl
                                    x3, y3, z3, 0,
                                    0,  0,  0,  1]) 4 4
         translate = Matrix (V.fromList [1, 0, 0, -ctx,
-                                        0, 0, 0, -cty,
+                                        0, 1, 0, -cty,
                                         0, 0, 1, -ctz,
                                         0, 0, 0, 1     ]) 4 4
 

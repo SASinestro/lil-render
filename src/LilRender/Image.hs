@@ -3,6 +3,9 @@ module LilRender.Image (
     , ImageIndexType
     , (<!>)
     , ImageFormat(..)
+    , makeImage
+    , thawImage
+    , freezeImage
     , loadImage
     , saveImage
     , drawImageWith

@@ -114,9 +114,12 @@ cameraTransform' (World (Point3 clx cly clz)) (World (Point3 ctx cty ctz)) (Worl
 cameraTransform ::CameraLocation -> CameraTarget -> Transform (World (Point3 Double)) (Camera (Point3 Double))
 cameraTransform location target = cameraTransform' location target (World (Vector3 0 1 0)) -- Up is usually up.
 
-orthographicProjectionTransform :: (Transformable a) => Transform (Camera a) (Clip a)
-orthographicProjectionTransform = identityTransform
-
+orthographicProjectionTransform :: (Transformable a) => World (Point3 Double) -> Transform (Camera a) (Clip a)
+orthographicProjectionTransform (World p) = Transform $ Matrix (V.fromList [1, 0, 0, 0,
+                                                                            0, 1, 0, 0,
+                                                                            0, 0, 1, -1/magnitude p,
+                                                                            0, 0, 0, 1 ]) 4 4
+    where magnitude = sqrt . foldr (\a b -> a ** 2 + b) 0
 type FOV = Double
 type AspectRatio = Double
 type Near = Double

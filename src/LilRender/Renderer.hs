@@ -27,9 +27,9 @@ drawTexturedModel image (Model faces) texture shader projection =
     where
         screenTriangleForFace :: Face -> m (Triangle (Screen (Point3 Double)))
         screenTriangleForFace (Face v1 v2 v3) = do
-            (Vertex (VertexPoint p1) _ _) <- vertexShader shader v1
-            (Vertex (VertexPoint p2) _ _) <- vertexShader shader v2
-            (Vertex (VertexPoint p3) _ _) <- vertexShader shader v3
+            (Vertex (VertexPoint p1) _ _) <- vertexShader shader v1 0
+            (Vertex (VertexPoint p2) _ _) <- vertexShader shader v2 1
+            (Vertex (VertexPoint p3) _ _) <- vertexShader shader v3 2
 
             let p1' = transform projection p1
             let p2' = transform projection p2

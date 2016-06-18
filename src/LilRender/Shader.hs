@@ -10,5 +10,5 @@ import           Control.Monad.Primitive
 type PointOnFace = Barycentric (Point3 Double)
 
 class Shader s where
-    vertexShader :: (PrimMonad m) => s (PrimState m) -> Vertex -> m Vertex
+    vertexShader :: (PrimMonad m) => s (PrimState m) -> Vertex -> Int -> m Vertex
     fragmentShader :: (PrimMonad m) => s (PrimState m) -> Texture -> m (PointOnFace -> Maybe RGBColor)

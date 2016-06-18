@@ -35,11 +35,10 @@ main = do
     let camera = cameraTransform cameraLocation cameraTarget
 
     let scale = scale' (3/4)
-    let viewport = viewportTransform (Screen (Point2 100 100)) 600 600
+    let viewport = viewportTransform (center width height) (scale width) (scale height)
 
     let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> orthographicProjectionTransform >>> viewport
 
     shader <- gouraudShader lightDirection identityTransform
-
     image <- drawImageWith width height NC.black (\image -> drawTexturedModel image model texture shader modelToScreen)
     saveImage TGA "head.tga" image

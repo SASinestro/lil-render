@@ -10,6 +10,8 @@ import LilRender.Math.Geometry
 import LilRender.Math.Vector
 import LilRender.Math.Transform
 
+import           Criterion.Measurement           (getTime, initializeTime, secs)
+
 width = 800
 height = 800
 
@@ -40,5 +42,13 @@ main = do
     let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> orthographicProjectionTransform >>> viewport
 
     shader <- gouraudShader lightDirection identityTransform
+
+    initializeTime
+
+    startTime <- getTime
     image <- drawImageWith width height NC.black (\image -> drawTexturedModel image model texture shader modelToScreen)
+    endTime <- getTime
+
+    putStrLn $ "Frame time: " ++ secs (endTime - startTime)
+
     saveImage TGA "head.tga" image

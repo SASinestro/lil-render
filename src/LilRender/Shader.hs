@@ -1,11 +1,11 @@
 module LilRender.Shader (Shader, vertexShader, fragmentShader) where
 
-import           LilRender.Color
-import           LilRender.Math.Geometry
-import           LilRender.Model
-import           LilRender.Texture
+import LilRender.Color
+import LilRender.Math.Geometry
+import LilRender.Model
+import LilRender.Texture
 
-import           Control.Monad.Primitive
+import Control.Monad.Primitive
 
 type PointOnFace = Barycentric (Point3 Double)
 

@@ -44,6 +44,7 @@ library
                       , store            >= 0.2.0.0 && < 0.3
                       , th-utilities     >= 0.1.0   && < 0.2
                       , vector-th-unbox  >= 0.2.1.6 && < 0.3
+                      , template-haskell >= 2.10.0  && < 2.11
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings
@@ -70,15 +71,19 @@ library
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports
 
     hs-source-dirs:     src
+    c-sources:  src/LilRender/Math/Geometry.c
+    cc-options: -Wall -O3 -march=core2
+    extra-libraries: m
+
     default-language:   Haskell2010
 
 executable lil-render
     main-is:          Main.hs
 
     build-depends:      base       >= 4.7     && < 5
+                      , lil-render >= 0.1.0   && < 0.2
                       , criterion  >= 1.1.1   && < 1.2
                       , deepseq    >= 1.4.1   && < 1.5
-                      , lil-render >= 0.1.0   && < 0.2
 
     default-extensions:  BangPatterns
                        , TemplateHaskell

@@ -9,7 +9,6 @@ module LilRender.Image.Immutable (
 ) where
 
 import           Control.DeepSeq
-import           Data.Vector.Unboxed     ((!))
 import qualified Data.Vector.Unboxed     as V
 import           GHC.Generics            (Generic)
 
@@ -30,7 +29,7 @@ instance NFData Image
 type ImageIndexType = Screen (Point2 Int)
 
 (<!>) :: Image -> ImageIndexType -> RGBColor
-Image { _storage = storage,  _width = width } <!> (Screen (Point2 x y)) = storage ! (width * y + x)
+Image { _storage = storage,  _width = width } <!> (Screen (Point2 x y)) = storage `V.unsafeIndex` (width * y + x)
 
 class ImageConvertible a where
     toImage :: a -> Image

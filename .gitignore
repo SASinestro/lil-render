@@ -21,7 +21,6 @@ cabal.project.local
 .idea/
 *.iml
 .DS_Store
-.stylish-haskell.yaml
 *.obj
 *.tga
 !data/*/*

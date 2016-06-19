@@ -46,3 +46,9 @@ center width height = Screen (Point2 x y)
 benchDrawImage width height = env (drawENV width height) $ bench "Draw model in memory" . whnfIO . \(model, texture, modelToScreen) -> do
     shader <- phongShader (normalizeVect <$> lightDirection) identityTransform
     drawImageWith width height NC.royalBlue (\image -> drawTexturedModel image model texture shader modelToScreen)
+
+macro width height = bgroup "Macro benchmarks" [
+      benchLoadModel
+    , benchLoadTexture
+    , benchDrawImage width height
+    ]

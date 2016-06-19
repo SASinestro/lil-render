@@ -1,9 +1,11 @@
 module LilRender.Image.Mutable (MutableImage(..), ZBufferIndexType, drawImageWith, thawImage, freezeImage, drawPixel) where
 
+import           Control.DeepSeq
 import           Control.Monad
 import           Control.Monad.Primitive
 import qualified Data.Vector.Unboxed         as V
 import qualified Data.Vector.Unboxed.Mutable as MV
+import           GHC.Generics
 
 import           LilRender.Color
 import           LilRender.Image.Immutable
@@ -16,7 +18,9 @@ data MutableImage s = MutableImage {
     , _mZBuffer :: V.MVector s Int
     , _mWidth   :: Int
     , _mHeight  :: Int
-    }
+    } deriving (Generic)
+
+instance NFData (MutableImage s)
 
 drawImageWith :: (PrimMonad m) => Int -> Int -> RGBColor -> (MutableImage (PrimState m) -> m ()) -> m Image
 drawImageWith width height bg creator = do

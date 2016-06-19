@@ -1,6 +1,7 @@
 module Bench where
 
 import Bench.Macro
+import Bench.Triangles
 
 import Criterion.Main
 
@@ -9,9 +10,6 @@ height = 800
 
 main :: IO ()
 main = defaultMain [
-    bgroup "Macro benchmarks" [
-          benchLoadModel
-        , benchLoadTexture
-        , benchDrawImage width height
-        ]
+      macro width height
+     , triangles
     ]

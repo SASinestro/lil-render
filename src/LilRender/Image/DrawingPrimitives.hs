@@ -26,7 +26,7 @@ drawFilledTriangle :: forall m. (PrimMonad m) => MutableImage (PrimState m)
                                               -> m ()
 drawFilledTriangle img getColor triangle @ (Triangle (Screen (Point3 _ _ z1))
                                                      (Screen (Point3 _ _ z2))
-                                                     (Screen (Point3 _ _ z3 ))) =
+                                                     (Screen (Point3 _ _ z3))) =
     mapM_ drawPointInTriangle $ boundingRect triangle
 
     where

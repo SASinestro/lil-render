@@ -1,6 +1,7 @@
 module LilRender.Math.Geometry where
 
 import Control.DeepSeq
+import Control.Monad
 import Data.Ix
 import Data.Vector.Unboxed          (Unbox)
 import Data.Vector.Unboxed.Deriving

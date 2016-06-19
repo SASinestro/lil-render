@@ -14,12 +14,27 @@ import           LilRender.Math.Geometry
 import           LilRender.Model.Internal
 import           LilRender.Model.Wavefront
 
+#ifdef DEBUG
+import           Debug.Trace
+import qualified Data.Vector as V
+#endif
+
 data ModelFormat = WavefrontOBJ
 
+#ifndef DEBUG
 loadModel :: ModelFormat -> FilePath -> IO Model
 loadModel WavefrontOBJ path = do
     obj <- T.readFile path
     return $ loadWavefrontObj obj
+#else
+loadModel :: ModelFormat -> FilePath -> IO Model
+loadModel WavefrontOBJ path = do
+    obj <- T.readFile path
+    let model @ (Model faces) = loadWavefrontObj obj
+    traceM $ "Loaded model with " ++ show (V.length faces) ++ " tris."
+    return model
+#endif
+
 
 faceToTriangle :: Face -> Triangle (ModelSpace (Point3 Double))
 faceToTriangle (Face

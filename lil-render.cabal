@@ -47,10 +47,7 @@ library
                       , vector-th-unbox  >= 0.2.1.6 && < 0.3
                       , template-haskell >= 2.10.0  && < 2.12
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , template-haskell >= 2.10.0  && < 2.11
-                      , QuickCheck       >= 2.8.2   && < 2.9
                       , repa             >= 3.4     && < 3.5
-
     default-extensions: DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
@@ -119,7 +116,7 @@ benchmark lil-render-bench
                       , vector-th-unbox  >= 0.2.1   && < 0.3
                       , template-haskell >= 2.10.0  && < 2.11
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , repa             >= 3.4     && < 3.5
+                      , repa             >= 3.4.1   && < 3.5
     default-extensions: DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances

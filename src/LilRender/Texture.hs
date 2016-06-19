@@ -1,7 +1,7 @@
 module LilRender.Texture (Texture, getColorFromTexture, loadTexture, ImageFormat(..)) where
 
-import Control.Monad           (liftM)
 import Control.DeepSeq
+import Control.Monad           (liftM)
 import LilRender.Color
 import LilRender.Image
 import LilRender.Math.Geometry

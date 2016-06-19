@@ -5,8 +5,13 @@ import Data.Ix
 import Data.Vector.Unboxed          (Unbox)
 import Data.Vector.Unboxed.Deriving
 import GHC.Generics
+import Test.QuickCheck.Arbitrary
+import Test.QuickCheck.Gen
 
-import LilRender.Math.Vector
+import Foreign.Marshal
+import Foreign.Ptr
+import Foreign.Storable
+import System.IO.Unsafe
 
 class Point p
 
@@ -21,6 +26,19 @@ derivingUnbox "Point2"
     [t| forall a. (Unbox a) => Point2 a -> (a, a) |]
     [| \(Point2 x y) -> (x, y) |]
     [| \(x, y) -> (Point2 x y) |]
+
+instance (Storable a) => Storable (Point2 a) where
+    sizeOf _ = 2 * sizeOf (undefined :: a)
+    alignment _ = alignment (undefined :: a)
+    peek ptr = do
+        let ptr' = castPtr ptr :: Ptr a
+        a <- peekElemOff ptr' 0
+        b <- peekElemOff ptr' 1
+        return $ Point2 a b
+    poke ptr (Point2 a b) = do
+        let ptr' = castPtr ptr :: Ptr a
+        pokeElemOff ptr' 0 a
+        pokeElemOff ptr' 1 b
 
 instance (Ix a) => Ix (Point2 a) where
     range (Point2 p1x p1y, Point2 p2x p2y) = [Point2 i1 i2 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y)]
@@ -40,18 +58,39 @@ derivingUnbox "Point3"
     [| \(Point3 x y z) -> (x, y, z) |]
     [| \(x, y, z) -> (Point3 x y z) |]
 
+instance (Storable a) => Storable (Point3 a) where
+    sizeOf _ = 3 * sizeOf (undefined :: a)
+    alignment _ = alignment (undefined :: a)
+    peek ptr = do
+        let ptr' = castPtr ptr :: Ptr a
+        a <- peekElemOff ptr' 0
+        b <- peekElemOff ptr' 1
+        c <- peekElemOff ptr' 2
+        return $ Point3 a b c
+    poke ptr (Point3 a b c) = do
+        let ptr' = castPtr ptr :: Ptr a
+        pokeElemOff ptr' 0 a
+        pokeElemOff ptr' 1 b
+        pokeElemOff ptr' 2 c
+
 instance (Ix a) => Ix (Point3 a) where
     range   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) = [Point3 i1 i2 i3 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y), i3 <- range (p1z, p2z)]
     index   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = index (p1z, p2z) pz + rangeSize (p1z, p2z) * (index (p1y, p2y) py + rangeSize (p1y, p2y) * index (p1x, p2x) px)
     inRange (Point3 p1x p1y p1z, Point3 p2x p2y p2z) (Point3 px py pz) = inRange (p1x, p2x) px && inRange (p1y, p2y) py && inRange (p1z, p2z) pz
 
-newtype ModelSpace a = ModelSpace { fromModelSpace :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
-newtype World a = World { fromWorld :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
-newtype Camera a = Camera { fromCamera :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
-newtype Clip a = Clip { fromClip :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
-newtype Screen a = Screen { fromScreen :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
+instance Arbitrary (Screen (Point3 Double)) where
+  arbitrary = do
+      a <- choose (0, 800)
+      b <- choose (0, 800)
+      c <- choose (0, 800)
+      return $ Screen (Point3 a b c)
 
-newtype Barycentric a = Barycentric { fromBarycentric :: a } deriving (Eq, Show, Functor, Ord, Ix, NFData)
+newtype ModelSpace a = ModelSpace { fromModelSpace :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable, NFData)
+newtype World a = World { fromWorld :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable, NFData)
+newtype Camera a = Camera { fromCamera :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable, NFData)
+newtype Clip a = Clip { fromClip :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable, NFData)
+newtype Screen a = Screen { fromScreen :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable, NFData)
+newtype Barycentric a = Barycentric { fromBarycentric :: a } deriving (Eq, Show, Functor, Ord, Ix, Storable)
 
 derivingUnbox "ModelSpace"
     [t| forall a. (Unbox a) => ModelSpace a -> a |]
@@ -81,17 +120,27 @@ derivingUnbox "Screen"
 data Triangle a = Triangle {
         _vertex1, _vertex2, _vertex3 :: !a
 } deriving (Show, Eq, Functor, Generic)
-
 instance (NFData a) => NFData (Triangle a)
 
-toBarycentric :: (Real a, Fractional b, Ord b) => Triangle (Screen (Point3 a)) -> Screen (Point2 a) -> Barycentric (Point3 b)
-toBarycentric (Triangle (Screen (Point3 p1x p1y _)) (Screen (Point3 p2x p2y _)) (Screen (Point3 p3x p3y _))) (Screen (Point2 px py))
-    | abs c < 1 = Barycentric $ Point3 (-1) 1 1
-    | otherwise = Barycentric $ Point3 (1 - (a + b)/c) (b/c) (a/c)
-    where
-        vect1 = Vector3 (p3x - p1x) (p2x - p1x) (p1x - px)
-        vect2 = Vector3 (p3y - p1y) (p2y - p1y) (p1y - py)
-        (Vector3 a b c) = realToFrac <$> crossVect vect1 vect2
+instance (Arbitrary a) => Arbitrary (Triangle a) where
+  arbitrary = do
+      liftM3 Triangle arbitrary arbitrary arbitrary
+
+foreign import ccall "src/LilRender/Math/Geometry.h toBarycentric" toBary :: Ptr (Point3 Double)
+                                                                          -> Ptr (Point3 Double)
+                                                                          -> Ptr (Point3 Double)
+                                                                          -> Ptr (Point2 Double)
+                                                                          -> Ptr (Point3 Double)
+
+toBarycentric :: Triangle (Screen (Point3 Double)) -> Screen (Point2 Double) -> Barycentric (Point3 Double)
+toBarycentric (Triangle (Screen vertex1) (Screen vertex2) (Screen vertex3)) (Screen point)
+    = unsafePerformIO $ do
+        vtx1 <- new vertex1
+        vtx2 <- new vertex2
+        vtx3 <- new vertex3
+        p    <- new point
+        out <- peek $ toBary vtx1 vtx2 vtx3 p
+        return $ Barycentric out
 
 triangularInterpolate :: Double -> Double -> Double -> Barycentric (Point3 Double) -> Double
 triangularInterpolate a b c (Barycentric (Point3 lambda1 lambda2 lambda3)) = a * lambda1 + b * lambda2 + c * lambda3

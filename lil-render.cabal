@@ -46,6 +46,7 @@ library
                       , th-utilities     >= 0.1.0   && < 0.2
                       , vector-th-unbox  >= 0.2.1.6 && < 0.3
                       , template-haskell >= 2.10.0  && < 2.11
+                      , QuickCheck       >= 2.8.2   && < 2.9
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings

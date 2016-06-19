@@ -11,16 +11,19 @@ module LilRender.Image (
     , drawImageWith
     ) where
 
-import Control.Monad              (liftM)
+import Data.Array.Repa         as R
+import qualified Data.Vector.Unboxed     as V
 
-import LilRender.Image.Format.TGA (readTGAIO, writeTGA)
-import LilRender.Image.Immutable
-import LilRender.Image.Mutable
+import LilRender.Color
 
-data ImageFormat = TGA
+type Image a = Array U DIM2 a
+type ZBufferedImage a = Array U DIM2 (a, Int)
 
-loadImage :: ImageFormat -> FilePath -> IO Image
-loadImage TGA = liftM toImage . readTGAIO
+type ImageIndexType = DIM2
+type ZBufferedImageIndexType = DIM2
 
-saveImage :: ImageFormat -> FilePath -> Image -> IO ()
-saveImage TGA path img = writeTGA path $ fromImage img
+makeImage :: Int -> Int -> RGBColor -> Image RGBColor
+makeImage width height color = fromUnboxed (Z .: width .: height) $ V.replicate (width * height) color
+
+twoD :: ZBufferedImage a -> Image a
+twoD = R.map fst

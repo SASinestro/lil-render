@@ -93,3 +93,4 @@ language_extensions:
   - MultiParamTypeClasses
   - OverloadedStrings
   - BangPatterns
+  - CPP

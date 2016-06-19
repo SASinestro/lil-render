@@ -1,10 +1,9 @@
 module LilRender.Image.DrawingPrimitives (drawFilledTriangle, Triangle) where
 
 import Control.Monad           (when)
-import Control.Monad.Primitive
-
+import Data.Array.Repa as R
 import LilRender.Color
-import LilRender.Image.Mutable
+import LilRender.Image
 import LilRender.Math.Geometry
 
 boundingRect :: Triangle (Screen (Point3 Double)) -> [Screen (Point2 Int)]

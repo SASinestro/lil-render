@@ -48,6 +48,8 @@ library
                       , template-haskell >= 2.10.0  && < 2.12
                       , QuickCheck       >= 2.8.2   && < 2.9
                       , repa             >= 3.4     && < 3.5
+                      , JuicyPixels      >= 3.2.7   && < 3.3
+
     default-extensions: DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances

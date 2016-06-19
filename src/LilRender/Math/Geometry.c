@@ -21,8 +21,8 @@ double *toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *po
     if (c < 1)
     {
         out[0] = -1;
-        out[1] = -1;
-        out[2] = -1;
+        out[1] = 1;
+        out[2] = 1;
     }
     else
     {

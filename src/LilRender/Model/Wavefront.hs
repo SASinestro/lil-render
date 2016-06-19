@@ -92,8 +92,8 @@ faceResolver vert text norm = fmap faceResolver'
         faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (Vertex (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
                                                                                       (Vertex (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
                                                                                       (Vertex (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
-        lookup list idx = list V.! (idx - 1)
-        flookup list idx = (list V.!) . (+ (-1)) <$> idx
+        lookup list idx = V.unsafeIndex list (idx - 1)
+        flookup list idx = (\index -> V.unsafeIndex list (index - 1)) <$> idx
 
 loadWavefrontObj :: T.Text -> Model
 loadWavefrontObj obj = Model $ faceResolver v t n u

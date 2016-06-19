@@ -12,6 +12,10 @@ category:
 build-type:           Simple
 cabal-version:        >=1.10
 
+flag debug
+  description: Enable debug logging
+  default:     False
+
 library
     exposed-modules:    LilRender.Color
                       , LilRender.Color.Named
@@ -72,7 +76,8 @@ library
                       , ViewPatterns
                       , BangPatterns
                       , UnicodeSyntax
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
+                      , CPP
+    ghc-options: -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
 
     hs-source-dirs:     src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
@@ -80,6 +85,9 @@ library
     extra-libraries: m
 
     default-language:   Haskell2010
+
+    if flag(debug)
+        cpp-options:  -DDEBUG
 
 executable lil-render
     main-is:          Main.hs
@@ -96,7 +104,7 @@ executable lil-render
                        , GADTs
                        , UnicodeSyntax
 
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
+    ghc-options: -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
 
     hs-source-dirs:     bin
     default-language:   Haskell2010
@@ -118,7 +126,9 @@ benchmark lil-render-bench
                       , vector-th-unbox  >= 0.2.1   && < 0.3
                       , template-haskell >= 2.10.0  && < 2.11
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , repa             >= 3.4.1   && < 3.5
+                      , repa             >= 3.4     && < 3.5
+                      , JuicyPixels      >= 3.2.7   && < 3.3
+
     default-extensions: DeriveGeneric
                       , OverloadedStrings
                       , FlexibleInstances
@@ -141,9 +151,8 @@ benchmark lil-render-bench
                       , ViewPatterns
                       , BangPatterns
                       , UnicodeSyntax
-
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -main-is Bench.main -rtsopts -g
-
+                      , CPP
+    ghc-options: -main-is Bench -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-use-threshold16 -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
     hs-source-dirs:   bin, src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
     cc-options: -Wall -O3

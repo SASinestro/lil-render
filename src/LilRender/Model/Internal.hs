@@ -8,31 +8,16 @@ module LilRender.Model.Internal (
     ) where
 
 import           Control.DeepSeq
-import qualified Data.Vector                  as V
-import           Data.Vector.Unboxed.Deriving
+import qualified Data.Vector   as V
 import           GHC.Generics
+import           Foreign.Storable
 import           LilRender.Math.Geometry
 import           LilRender.Math.Vector
 
 
-newtype VertexPoint = VertexPoint { unwrapVertexPoint :: ModelSpace (Point3 Double) } deriving (Show, Eq, NFData)
-newtype TextureCoordinate = TextureCoordinate { unwrapTextureCoordinate :: Point2 Double } deriving (Show, Eq, NFData)
-newtype VertexNormal = VertexNormal { unwrapVertexNormal :: ModelSpace (Vector3 Double) } deriving (Show, Eq, NFData)
-
-derivingUnbox "VertexPoint"
-    [t| VertexPoint -> ModelSpace (Point3 Double) |]
-    [| unwrapVertexPoint |]
-    [| VertexPoint |]
-
-derivingUnbox "TextureCoordinate"
-    [t| TextureCoordinate -> Point2 Double |]
-    [| unwrapTextureCoordinate |]
-    [| TextureCoordinate |]
-
-derivingUnbox "VertexNormal"
-    [t| VertexNormal -> ModelSpace (Vector3 Double) |]
-    [| unwrapVertexNormal |]
-    [| VertexNormal |]
+newtype VertexPoint = VertexPoint { unwrapVertexPoint :: ModelSpace (Point3 Double) } deriving (Show, Eq, NFData, Storable)
+newtype TextureCoordinate = TextureCoordinate { unwrapTextureCoordinate :: Point2 Double } deriving (Show, Eq, NFData, Storable)
+newtype VertexNormal = VertexNormal { unwrapVertexNormal :: ModelSpace (Vector3 Double) } deriving (Show, Eq, NFData, Storable)
 
 data Vertex = Vertex {
                 _point             :: VertexPoint

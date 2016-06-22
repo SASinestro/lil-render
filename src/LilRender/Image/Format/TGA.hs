@@ -15,8 +15,7 @@ module LilRender.Image.Format.TGA (
 import           Control.Monad
 import           Data.Bits
 import qualified Data.ByteString           as BS
-import           Data.Vector.Unboxed       ((!))
-import qualified Data.Vector.Unboxed       as V
+import qualified Data.Vector.Storable      as V
 import           Data.Word
 
 import           LilRender.Color
@@ -25,6 +24,8 @@ import           LilRender.Image.Immutable
 import           Data.Store
 import           Data.Store.Internal       (skip)
 import           TH.Derive
+
+import Debug.Trace
 
 data TGAHeader = TGAHeader {
       _tgaIdFieldLen      :: Word8
@@ -149,7 +150,9 @@ readTGA contents = image
 
 
 writeTGA :: FilePath -> TGAImage -> IO ()
-writeTGA path = BS.writeFile path . encode
+writeTGA path = do
+    traceM "writeTGA"
+    BS.writeFile path . encode
 
 instance ImageConvertible TGAImage where
     toImage (TGAImage TGAHeader { _tgaHeight = height, _tgaWidth = width } color_map image_data) = Image storage height' width'
@@ -157,7 +160,7 @@ instance ImageConvertible TGAImage where
             height' = fromIntegral height
             width'  = fromIntegral width
             storage = case image_data of
-                (TGAIndexedData indexes) -> V.map ((color_map !) . fromIntegral) indexes
+                (TGAIndexedData indexes) -> V.map (V.unsafeIndex color_map . fromIntegral) indexes
                 (TGAUnmappedData colors) -> colors
     fromImage (Image storage width height) = TGAImage {
           _tgaHeader    = simpleTGAHeader width height
@@ -241,7 +244,7 @@ instance Store TGAImage where
 
         where
             pokeColor :: Word8 -> RGBColor -> Poke ()
-            pokeColor 24 (RGBColor r g b) = do
+            pokeColor 24 (RGBColor b g r) = do
                 poke b
                 poke g
                 poke r

@@ -2,139 +2,138 @@ module LilRender.Color.Named where
 
 import LilRender.Color
 
-aliceBlue = RGBColor 240 248 255
-alpha = RGBColor 0 0 0
-antiqueWhite = RGBColor 250 235 215
-aquamarine = RGBColor 127 255 212
-azure = RGBColor 240 255 255
-beige = RGBColor 245 245 220
-bisque = RGBColor 255 228 196
-black = RGBColor 0 0 0
-blanchedAlmond = RGBColor 255 235 205
-blue = RGBColor 0 0 255
-blueViolet = RGBColor 138 43 226
-brown = RGBColor 165 42 42
-burlywood = RGBColor 222 184 135
-cadetBlue = RGBColor 95 158 160
-chartreuse = RGBColor 127 255 0
-chocolate = RGBColor 210 105 30
-coral = RGBColor 255 127 80
-cornflowerBlue = RGBColor 100 149 237
-cornsilk = RGBColor 255 248 220
-cyan = RGBColor 0 255 255
-darkBlue = RGBColor 0 0 139
-darkCyan = RGBColor 0 139 139
-darkGoldenrod = RGBColor 184 134 11
-darkGreen = RGBColor 0 100 0
-darkGrey = RGBColor 169 169 169
-darkKhaki = RGBColor 189 183 107
-darkMagenta = RGBColor 139 0 139
-darkOliveGreen = RGBColor 85 107 47
-darkOrange = RGBColor 255 140 0
-darkOrchid = RGBColor 153 50 204
-darkRed = RGBColor 139 0 0
-darkSalmon = RGBColor 233 150 122
-darkSeaGreen = RGBColor 143 188 143
-darkSlateBlue = RGBColor 72 61 139
-darkSlateGrey = RGBColor 47 79 79
-darkTurquoise = RGBColor 0 206 209
-darkViolet = RGBColor 148 0 211
-deepPink = RGBColor 255 20 147
-deepSkyBlue = RGBColor 0 191 255
-dimGrey = RGBColor 105 105 105
-dodgerBlue = RGBColor 30 144 255
-firebrick = RGBColor 178 34 34
-floralWhite = RGBColor 255 250 240
-forestGreen = RGBColor 34 139 34
-gainsboro = RGBColor 220 220 220
-ghostWhite = RGBColor 248 248 255
-gold = RGBColor 255 215 0
-goldenrod = RGBColor 218 165 32
-green = RGBColor 0 255 0
-greenYellow = RGBColor 173 255 47
-grey = RGBColor 190 190 190
-honeydew = RGBColor 240 255 240
-hotPink = RGBColor 255 105 180
-indianRed = RGBColor 205 92 92
-ivory = RGBColor 255 255 240
-khaki = RGBColor 240 230 140
-lavender = RGBColor 230 230 250
-lavenderBlush = RGBColor 255 240 245
-lawnGreen = RGBColor 124 252 0
-lemonChiffon = RGBColor 255 250 205
-lightBlue = RGBColor 173 216 230
-lightCoral = RGBColor 240 128 128
-lightCyan = RGBColor 224 255 255
-lightGoldenrod = RGBColor 238 221 130
-lightGoldenrodYellow = RGBColor 250 250 210
-lightGreen = RGBColor 144 238 144
-lightGrey = RGBColor 211 211 211
-lightPink = RGBColor 255 182 193
-lightSalmon = RGBColor 255 160 122
-lightSeaGreen = RGBColor 32 178 170
-lightSkyBlue = RGBColor 135 206 250
-lightSlateBlue = RGBColor 132 112 255
-lightSlateGrey = RGBColor 119 136 153
-lightSteelBlue = RGBColor 176 196 222
-lightYellow = RGBColor 255 255 224
-limeGreen = RGBColor 50 205 50
-linen = RGBColor 250 240 230
-magenta = RGBColor 255 0 255
-maroon = RGBColor 176 48 96
-mediumAquamarine = RGBColor 102 205 170
-mediumBlue = RGBColor 0 0 205
-mediumOrchid = RGBColor 186 85 211
-mediumPurple = RGBColor 147 112 219
-mediumSeaGreen = RGBColor 60 179 113
-mediumSlateBlue = RGBColor 123 104 238
-mediumSpringGreen = RGBColor 0 250 154
-mediumTurquoise = RGBColor 72 209 204
-mediumVioletRed = RGBColor 199 21 133
-midnightBlue = RGBColor 25 25 112
-mintCream = RGBColor 245 255 250
-mistyRose = RGBColor 255 228 225
-moccasin = RGBColor 255 228 181
-navajoWhite = RGBColor 255 222 173
-navyBlue = RGBColor 0 0 128
-oldLace = RGBColor 253 245 230
-oliveDrab = RGBColor 107 142 35
-orange = RGBColor 255 165 0
-orangeRed = RGBColor 255 69 0
-orchid = RGBColor 218 112 214
-paleGoldenrod = RGBColor 238 232 170
-paleGreen = RGBColor 152 251 152
-paleTurquoise = RGBColor 175 238 238
-paleVioletRed = RGBColor 219 112 147
-papayaWhip = RGBColor 255 239 213
-peachPuff = RGBColor 255 218 185
-peru = RGBColor 205 133 63
-pink = RGBColor 255 192 203
-plum = RGBColor 221 160 221
-powderBlue = RGBColor 176 224 230
-purple = RGBColor 160 32 240
-red = RGBColor 255 0 0
-rosyBrown = RGBColor 188 143 143
-royalBlue = RGBColor 65 105 225
-saddleBrown = RGBColor 139 69 19
-salmon = RGBColor 250 128 114
-sandyBrown = RGBColor 244 164 96
-seaGreen = RGBColor 46 139 87
-seashell = RGBColor 255 245 238
-sienna = RGBColor 160 82 45
-skyBlue = RGBColor 135 206 235
-slateBlue = RGBColor 106 90 205
-slateGrey = RGBColor 112 128 144
-snow = RGBColor 255 250 250
-springGreen = RGBColor 0 255 127
-steelBlue = RGBColor 70 130 180
-tan = RGBColor 210 180 140
-thistle = RGBColor 216 191 216
-tomato = RGBColor 255 99 71
-turquoise = RGBColor 64 224 208
-violet = RGBColor 238 130 238
-violetRed = RGBColor 208 32 144
-wheat = RGBColor 245 222 179
-white = RGBColor 255 255 255
-whiteSmoke = RGBColor 245 245 245
-yellow = RGBColor 255 255 0
-yellowGreen = RGBColor 154 205 50
+aliceBlue = RGBColor { _red=240, _green=248, _blue=255 }
+antiqueWhite = RGBColor { _red=250, _green=235, _blue=215 }
+aquamarine = RGBColor { _red=127, _green=255, _blue=212 }
+azure = RGBColor { _red=240, _green=255, _blue=255 }
+beige = RGBColor { _red=245, _green=245, _blue=220 }
+bisque = RGBColor { _red=255, _green=228, _blue=196 }
+black = RGBColor { _red=0, _green=0, _blue=0 }
+blanchedAlmond = RGBColor { _red=255, _green=235, _blue=205 }
+blue = RGBColor { _red=0, _green=0, _blue=255 }
+blueViolet = RGBColor { _red=138, _green=43, _blue=226 }
+brown = RGBColor { _red=165, _green=42, _blue=42 }
+burlywood = RGBColor { _red=222, _green=184, _blue=135 }
+cadetBlue = RGBColor { _red=95, _green=158, _blue=160 }
+chartreuse = RGBColor { _red=127, _green=255, _blue=0 }
+chocolate = RGBColor { _red=210, _green=105, _blue=30 }
+coral = RGBColor { _red=255, _green=127, _blue=80 }
+cornflowerBlue = RGBColor { _red=100, _green=149, _blue=237 }
+cornsilk = RGBColor { _red=255, _green=248, _blue=220 }
+cyan = RGBColor { _red=0, _green=255, _blue=255 }
+darkBlue = RGBColor { _red=0, _green=0, _blue=139 }
+darkCyan = RGBColor { _red=0, _green=139, _blue=139 }
+darkGoldenrod = RGBColor { _red=184, _green=134, _blue=11 }
+darkGreen = RGBColor { _red=0, _green=100, _blue=0 }
+darkGrey = RGBColor { _red=169, _green=169, _blue=169 }
+darkKhaki = RGBColor { _red=189, _green=183, _blue=107 }
+darkMagenta = RGBColor { _red=139, _green=0, _blue=139 }
+darkOliveGreen = RGBColor { _red=85, _green=107, _blue=47 }
+darkOrange = RGBColor { _red=255, _green=140, _blue=0 }
+darkOrchid = RGBColor { _red=153, _green=50, _blue=204 }
+darkRed = RGBColor { _red=139, _green=0, _blue=0 }
+darkSalmon = RGBColor { _red=233, _green=150, _blue=122 }
+darkSeaGreen = RGBColor { _red=143, _green=188, _blue=143 }
+darkSlateBlue = RGBColor { _red=72, _green=61, _blue=139 }
+darkSlateGrey = RGBColor { _red=47, _green=79, _blue=79 }
+darkTurquoise = RGBColor { _red=0, _green=206, _blue=209 }
+darkViolet = RGBColor { _red=148, _green=0, _blue=211 }
+deepPink = RGBColor { _red=255, _green=20, _blue=147 }
+deepSkyBlue = RGBColor { _red=0, _green=191, _blue=255 }
+dimGrey = RGBColor { _red=105, _green=105, _blue=105 }
+dodgerBlue = RGBColor { _red=30, _green=144, _blue=255 }
+firebrick = RGBColor { _red=178, _green=34, _blue=34 }
+floralWhite = RGBColor { _red=255, _green=250, _blue=240 }
+forestGreen = RGBColor { _red=34, _green=139, _blue=34 }
+gainsboro = RGBColor { _red=220, _green=220, _blue=220 }
+ghostWhite = RGBColor { _red=248, _green=248, _blue=255 }
+gold = RGBColor { _red=255, _green=215, _blue=0 }
+goldenrod = RGBColor { _red=218, _green=165, _blue=32 }
+green = RGBColor { _red=0, _green=255, _blue=0 }
+greenYellow = RGBColor { _red=173, _green=255, _blue=47 }
+grey = RGBColor { _red=190, _green=190, _blue=190 }
+honeydew = RGBColor { _red=240, _green=255, _blue=240 }
+hotPink = RGBColor { _red=255, _green=105, _blue=180 }
+indianRed = RGBColor { _red=205, _green=92, _blue=92 }
+ivory = RGBColor { _red=255, _green=255, _blue=240 }
+khaki = RGBColor { _red=240, _green=230, _blue=140 }
+lavender = RGBColor { _red=230, _green=230, _blue=250 }
+lavenderBlush = RGBColor { _red=255, _green=240, _blue=245 }
+lawnGreen = RGBColor { _red=124, _green=252, _blue=0 }
+lemonChiffon = RGBColor { _red=255, _green=250, _blue=205 }
+lightBlue = RGBColor { _red=173, _green=216, _blue=230 }
+lightCoral = RGBColor { _red=240, _green=128, _blue=128 }
+lightCyan = RGBColor { _red=224, _green=255, _blue=255 }
+lightGoldenrod = RGBColor { _red=238, _green=221, _blue=130 }
+lightGoldenrodYellow = RGBColor { _red=250, _green=250, _blue=210 }
+lightGreen = RGBColor { _red=144, _green=238, _blue=144 }
+lightGrey = RGBColor { _red=211, _green=211, _blue=211 }
+lightPink = RGBColor { _red=255, _green=182, _blue=193 }
+lightSalmon = RGBColor { _red=255, _green=160, _blue=122 }
+lightSeaGreen = RGBColor { _red=32, _green=178, _blue=170 }
+lightSkyBlue = RGBColor { _red=135, _green=206, _blue=250 }
+lightSlateBlue = RGBColor { _red=132, _green=112, _blue=255 }
+lightSlateGrey = RGBColor { _red=119, _green=136, _blue=153 }
+lightSteelBlue = RGBColor { _red=176, _green=196, _blue=222 }
+lightYellow = RGBColor { _red=255, _green=255, _blue=224 }
+limeGreen = RGBColor { _red=50, _green=205, _blue=50 }
+linen = RGBColor { _red=250, _green=240, _blue=230 }
+magenta = RGBColor { _red=255, _green=0, _blue=255 }
+maroon = RGBColor { _red=176, _green=48, _blue=96 }
+mediumAquamarine = RGBColor { _red=102, _green=205, _blue=170 }
+mediumBlue = RGBColor { _red=0, _green=0, _blue=205 }
+mediumOrchid = RGBColor { _red=186, _green=85, _blue=211 }
+mediumPurple = RGBColor { _red=147, _green=112, _blue=219 }
+mediumSeaGreen = RGBColor { _red=60, _green=179, _blue=113 }
+mediumSlateBlue = RGBColor { _red=123, _green=104, _blue=238 }
+mediumSpringGreen = RGBColor { _red=0, _green=250, _blue=154 }
+mediumTurquoise = RGBColor { _red=72, _green=209, _blue=204 }
+mediumVioletRed = RGBColor { _red=199, _green=21, _blue=133 }
+midnightBlue = RGBColor { _red=25, _green=25, _blue=112 }
+mintCream = RGBColor { _red=245, _green=255, _blue=250 }
+mistyRose = RGBColor { _red=255, _green=228, _blue=225 }
+moccasin = RGBColor { _red=255, _green=228, _blue=181 }
+navajoWhite = RGBColor { _red=255, _green=222, _blue=173 }
+navyBlue = RGBColor { _red=0, _green=0, _blue=128 }
+oldLace = RGBColor { _red=253, _green=245, _blue=230 }
+oliveDrab = RGBColor { _red=107, _green=142, _blue=35 }
+orange = RGBColor { _red=255, _green=165, _blue=0 }
+orangeRed = RGBColor { _red=255, _green=69, _blue=0 }
+orchid = RGBColor { _red=218, _green=112, _blue=214 }
+paleGoldenrod = RGBColor { _red=238, _green=232, _blue=170 }
+paleGreen = RGBColor { _red=152, _green=251, _blue=152 }
+paleTurquoise = RGBColor { _red=175, _green=238, _blue=238 }
+paleVioletRed = RGBColor { _red=219, _green=112, _blue=147 }
+papayaWhip = RGBColor { _red=255, _green=239, _blue=213 }
+peachPuff = RGBColor { _red=255, _green=218, _blue=185 }
+peru = RGBColor { _red=205, _green=133, _blue=63 }
+pink = RGBColor { _red=255, _green=192, _blue=203 }
+plum = RGBColor { _red=221, _green=160, _blue=221 }
+powderBlue = RGBColor { _red=176, _green=224, _blue=230 }
+purple = RGBColor { _red=160, _green=32, _blue=240 }
+red = RGBColor { _red=255, _green=0, _blue=0 }
+rosyBrown = RGBColor { _red=188, _green=143, _blue=143 }
+royalBlue = RGBColor { _red=65, _green=105, _blue=225 }
+saddleBrown = RGBColor { _red=139, _green=69, _blue=19 }
+salmon = RGBColor { _red=250, _green=128, _blue=114 }
+sandyBrown = RGBColor { _red=244, _green=164, _blue=96 }
+seaGreen = RGBColor { _red=46, _green=139, _blue=87 }
+seashell = RGBColor { _red=255, _green=245, _blue=238 }
+sienna = RGBColor { _red=160, _green=82, _blue=45 }
+skyBlue = RGBColor { _red=135, _green=206, _blue=235 }
+slateBlue = RGBColor { _red=106, _green=90, _blue=205 }
+slateGrey = RGBColor { _red=112, _green=128, _blue=144 }
+snow = RGBColor { _red=255, _green=250, _blue=250 }
+springGreen = RGBColor { _red=0, _green=255, _blue=127 }
+steelBlue = RGBColor { _red=70, _green=130, _blue=180 }
+tan = RGBColor { _red=210, _green=180, _blue=140 }
+thistle = RGBColor { _red=216, _green=191, _blue=216 }
+tomato = RGBColor { _red=255, _green=99, _blue=71 }
+turquoise = RGBColor { _red=64, _green=224, _blue=208 }
+violet = RGBColor { _red=238, _green=130, _blue=238 }
+violetRed = RGBColor { _red=208, _green=32, _blue=144 }
+wheat = RGBColor { _red=245, _green=222, _blue=179 }
+white = RGBColor { _red=255, _green=255, _blue=255 }
+whiteSmoke = RGBColor { _red=245, _green=245, _blue=245 }
+yellow = RGBColor { _red=255, _green=255, _blue=0 }
+yellowGreen = RGBColor { _red=154, _green=205, _blue=50 }

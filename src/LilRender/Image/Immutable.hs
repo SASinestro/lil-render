@@ -9,7 +9,7 @@ module LilRender.Image.Immutable (
 ) where
 
 import           Control.DeepSeq
-import qualified Data.Vector.Unboxed     as V
+import qualified Data.Vector.Storable    as V
 import           GHC.Generics            (Generic)
 
 import           LilRender.Color

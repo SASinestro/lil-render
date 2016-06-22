@@ -10,15 +10,29 @@ module LilRender.Math.Vector (
     ) where
 
 import Control.DeepSeq
-import Data.Vector.Unboxed          (Unbox)
-import Data.Vector.Unboxed.Deriving
 import GHC.Generics
+import Foreign.Ptr
+import Foreign.Storable
+
 
 data Vector2 a = Vector2 {
       v2_x :: !a
     , v2_y :: !a
 } deriving (Show, Eq, Functor, Foldable, Generic)
 instance (NFData a) => NFData (Vector2 a)
+
+instance (Storable a) => Storable (Vector2 a) where
+    sizeOf _ = 2 * sizeOf (undefined :: a)
+    alignment _ = alignment (undefined :: a)
+    peek ptr = do
+        let ptr' = castPtr ptr :: Ptr a
+        a <- peekElemOff ptr' 0
+        b <- peekElemOff ptr' 1
+        return $ Vector2 a b
+    poke ptr (Vector2 a b) = do
+        let ptr' = castPtr ptr :: Ptr a
+        pokeElemOff ptr' 0 a
+        pokeElemOff ptr' 1 b
 
 data Vector3 a = Vector3 {
       v3_x :: !a
@@ -27,15 +41,20 @@ data Vector3 a = Vector3 {
 } deriving (Show, Eq, Functor, Foldable, Generic)
 instance (NFData a) => NFData (Vector3 a)
 
-derivingUnbox "Vector2"
-    [t| forall a. (Unbox a) => Vector2 a -> (a, a) |]
-    [| \(Vector2 x y) -> (x, y) |]
-    [| \(x, y) -> (Vector2 x y) |]
-
-derivingUnbox "Vector3"
-    [t| forall a. (Unbox a) => Vector3 a -> (a, a, a) |]
-    [| \(Vector3 x y z) -> (x, y, z) |]
-    [| \(x, y, z) -> (Vector3 x y z) |]
+instance (Storable a) => Storable (Vector3 a) where
+    sizeOf _ = 3 * sizeOf (undefined :: a)
+    alignment _ = alignment (undefined :: a)
+    peek ptr = do
+        let ptr' = castPtr ptr :: Ptr a
+        a <- peekElemOff ptr' 0
+        b <- peekElemOff ptr' 1
+        c <- peekElemOff ptr' 2
+        return $ Vector3 a b c
+    poke ptr (Vector3 a b c) = do
+        let ptr' = castPtr ptr :: Ptr a
+        pokeElemOff ptr' 0 a
+        pokeElemOff ptr' 1 b
+        pokeElemOff ptr' 2 c
 
 instance (Num a) => Monoid (Vector2 a) where
     mempty = zeroVect

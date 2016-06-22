@@ -13,8 +13,6 @@ module LilRender.Math.Transform (
 
     , cameraTransform
     , orthographicProjectionTransform
-    , perspectiveProjectionTransform'
-    , perspectiveProjectionTransform
     , viewportTransform
 ) where
 
@@ -27,7 +25,7 @@ import           LilRender.Math.Matrix
 import           LilRender.Math.Vector
 
 data Transform a b = Transform (Matrix Double) deriving (Show, Eq, Generic)
-instance NFData (Transform a b)
+instance NFData (Transform a b) where rnf !_ = ()
 
 class Transformable a where
     toMatrix :: a -> Matrix Double
@@ -123,23 +121,6 @@ orthographicProjectionTransform (World p) = Transform $ Matrix (V.fromList [1, 0
                                                                             0, 0, 1, -1/magnitude p,
                                                                             0, 0, 0, 1 ]) 4 4
     where magnitude = sqrt . foldr (\a b -> a ** 2 + b) 0
-type FOV = Double
-type AspectRatio = Double
-type Near = Double
-type Far = Double
-
-perspectiveProjectionTransform' :: FOV -> AspectRatio -> Near -> Far -> Transform (Camera (Point3 Double)) (Clip (Point3 Double))
-perspectiveProjectionTransform' fov aspectRatio near far
-    = Transform $ Matrix (V.fromList [uw, 0,  0,                                0,
-                                      0,  uh, 0,                                0,
-                                      0,  0,  far / (far - near),               1,
-                                      0,  0,  (-1 * far * near) / (far - near), 0 ]) 4 4
-    where
-        uh = 1 / tan (fov / 2)
-        uw = uh / aspectRatio
-
-perspectiveProjectionTransform :: FOV → AspectRatio → Transform (Camera (Point3 Double)) (Clip (Point3 Double))
-perspectiveProjectionTransform fov aspectRatio = perspectiveProjectionTransform' fov aspectRatio (-1) 1
 
 type CenterPoint = (Screen (Point2 Int))
 type Width = Int

@@ -11,13 +11,13 @@ import LilRender.Model.Internal
 import LilRender.Shader
 import LilRender.Texture
 
-drawTexturedModel :: forall m shader. (PrimMonad m, Shader shader) =>
-                    MutableImage (PrimState m) -- Target
+drawTexturedModel :: (Shader shader) =>
+                    MutableImage (PrimState IO) -- Target
                     -> Model -- The model to be rendered
                     -> Texture -- The texture
-                    -> shader (PrimState m) -- The shader
+                    -> shader (PrimState IO) -- The shader
                     -> Transform (ModelSpace (Point3 Double)) (Screen (Point3 Double)) -- The projection from ModelSpace to Screen
-                    -> m ()
+                    -> IO ()
 drawTexturedModel image (Model faces) texture shader projection =
     forM_ faces (\face -> do
         tri <- screenTriangleForFace face
@@ -25,7 +25,7 @@ drawTexturedModel image (Model faces) texture shader projection =
         drawFilledTriangle image color tri
     )
     where
-        screenTriangleForFace :: Face -> m (Triangle (Screen (Point3 Double)))
+        screenTriangleForFace :: Face -> IO (Triangle (Screen (Point3 Double)))
         screenTriangleForFace (Face v1 v2 v3) = do
             (Vertex (VertexPoint p1) _ _) <- vertexShader shader v1 0
             (Vertex (VertexPoint p2) _ _) <- vertexShader shader v2 1

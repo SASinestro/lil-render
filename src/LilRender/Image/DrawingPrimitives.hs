@@ -1,38 +1,35 @@
-module LilRender.Image.DrawingPrimitives (drawFilledTriangle, Triangle) where
+module LilRender.Image.DrawingPrimitives (drawFilledTriangle
+    , drawTri, wrapColorGetter, wrapGetColor
+    ) where
 
-import Control.Monad           (when)
 import Control.Monad.Primitive
+import qualified Data.Vector.Storable.Mutable as MV
+
+import Foreign.ForeignPtr.Unsafe
+import Foreign.Marshal
+import Foreign.Ptr
+import Foreign.Storable
 
 import LilRender.Color
 import LilRender.Image.Mutable
 import LilRender.Math.Geometry
 
-boundingRect :: Triangle (Screen (Point3 Double)) -> [Screen (Point2 Int)]
-boundingRect (Triangle (Screen (Point3 p1x p1y _)) (Screen (Point3 p2x p2y _)) (Screen (Point3 p3x p3y _))) =
-    [Screen (Point2 i j) | i <- [minX .. maxX], j <- [minY .. maxY]]
-    where
-        minX = round $ minimum [p1x, p2x, p3x]
-        maxX = round $ maximum [p1x, p2x, p3x]
+foreign import ccall "src/LilRender/Image/DrawingPrimitives.h drawTri" drawTri :: Ptr RGBColor -> Ptr Int -> Int -> FunPtr (Ptr (Barycentric (Point3 Double)) -> IO (Ptr (Maybe RGBColor))) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> IO ()
 
-        minY = round $ minimum [p1y, p2y, p3y]
-        maxY = round $ maximum [p1y, p2y, p3y]
+foreign import ccall "wrapper" wrapColorGetter :: (Ptr (Barycentric (Point3 Double)) -> IO (Ptr (Maybe RGBColor))) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> IO (Ptr (Maybe RGBColor))))
 
-isInTriangle :: Barycentric (Point3 Double) -> Bool
-isInTriangle (Barycentric (Point3 a b c)) = a >= 0 && b >= 0 && c >= 0
+drawFilledTriangle :: MutableImage (PrimState IO) -> (Barycentric (Point3 Double) -> Maybe RGBColor) -> Triangle (Screen (Point3 Double)) -> IO ()
+drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle (Screen vertex1) (Screen vertex2) (Screen vertex3)) = do
+    let pixBuf = unsafeForeignPtrToPtr . fst . MV.unsafeToForeignPtr0 $ pixels
+    let zBuf   = unsafeForeignPtrToPtr . fst . MV.unsafeToForeignPtr0 $ zBuffer
+    colorLookup <- wrapGetColor getColor
+    vtx1 <- new . fmap realToFrac $ vertex1
+    vtx2 <- new . fmap realToFrac $ vertex2
+    vtx3 <- new . fmap realToFrac $ vertex3
+    drawTri pixBuf zBuf width colorLookup vtx1 vtx2 vtx3
 
-drawFilledTriangle :: forall m. (PrimMonad m) => MutableImage (PrimState m)
-                                              -> (Barycentric (Point3 Double) -> Maybe RGBColor)
-                                              -> Triangle (Screen (Point3 Double))
-                                              -> m ()
-drawFilledTriangle img getColor triangle @ (Triangle (Screen (Point3 _ _ z1))
-                                                     (Screen (Point3 _ _ z2))
-                                                     (Screen (Point3 _ _ z3))) =
-    mapM_ drawPointInTriangle $ boundingRect triangle
-
-    where
-        addZ :: Screen (Point2 Int) -> Barycentric (Point3 Double) -> Screen (Point3 Int)
-        addZ (Screen (Point2 x y)) bary = Screen $ Point3 x y (round $ triangularInterpolate z1 z2 z3 bary)
-
-        drawPointInTriangle :: Screen (Point2 Int) -> m ()
-        drawPointInTriangle point = when (isInTriangle bary) $ maybe (return ()) (drawPixel img (addZ point bary)) $ getColor bary
-            where bary = toBarycentric triangle (fmap fromIntegral <$> point)
+wrapGetColor :: (Barycentric (Point3 Double) -> Maybe RGBColor) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> IO (Ptr (Maybe RGBColor))))
+wrapGetColor getColor = wrapColorGetter (\ptr -> do
+    point <- peek ptr
+    Foreign.Marshal.new $ getColor point
+    )

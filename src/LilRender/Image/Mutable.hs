@@ -1,15 +1,16 @@
-module LilRender.Image.Mutable (MutableImage(..), ZBufferIndexType, drawImageWith, thawImage, freezeImage, drawPixel) where
+module LilRender.Image.Mutable (MutableImage(..), ZBufferIndexType, drawImageWith, thawImage, freezeImage) where
 
 import           Control.DeepSeq
-import           Control.Monad
 import           Control.Monad.Primitive
-import qualified Data.Vector.Unboxed         as V
-import qualified Data.Vector.Unboxed.Mutable as MV
+import qualified Data.Vector.Storable         as V
+import qualified Data.Vector.Storable.Mutable as MV
 import           GHC.Generics
 
 import           LilRender.Color
 import           LilRender.Image.Immutable
 import           LilRender.Math.Geometry
+
+import Debug.Trace
 
 type ZBufferIndexType = Screen (Point3 Int)
 
@@ -40,12 +41,3 @@ freezeImage :: PrimMonad m => MutableImage (PrimState m) -> m Image
 freezeImage (MutableImage mStorage _ width height) = do
     storage <- V.freeze mStorage
     return $ Image storage width height
-
-drawPixel :: PrimMonad m => MutableImage (PrimState m) -> ZBufferIndexType -> RGBColor -> m ()
-drawPixel (MutableImage mStorage zBuffer width _) (Screen (Point3 x y z)) color = do
-    oldZ <- MV.read zBuffer idx
-    when (oldZ < z) $ do
-        MV.unsafeWrite mStorage idx color
-        MV.unsafeWrite zBuffer idx z
-        where
-            idx = width * y + x

@@ -10,8 +10,6 @@ import           LilRender.Color
 import           LilRender.Image.Immutable
 import           LilRender.Math.Geometry
 
-import Debug.Trace
-
 type ZBufferIndexType = Screen (Point3 Int)
 
 data MutableImage s = MutableImage {
@@ -26,7 +24,7 @@ instance NFData (MutableImage s)
 drawImageWith :: (PrimMonad m) => Int -> Int -> RGBColor -> (MutableImage (PrimState m) -> m ()) -> m Image
 drawImageWith width height bg creator = do
     storage <- MV.replicate (width * height) bg
-    zBuffer <- MV.replicate (width * height) minBound
+    zBuffer <- MV.replicate (width * height) 0
     let image = MutableImage storage zBuffer width height
     creator image
     freezeImage image

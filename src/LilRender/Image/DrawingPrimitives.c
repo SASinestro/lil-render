@@ -42,30 +42,28 @@ double *toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *po
 
 void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
 {
-    int min_x = round(min( t_vtx1[0], min( t_vtx2[0], t_vtx3[0] )));
-    int min_y = round(min( t_vtx1[1], min( t_vtx2[1], t_vtx3[1] )));
+    int min_x = min( t_vtx1[0], min( t_vtx2[0], t_vtx3[0] ));
+    int min_y = min( t_vtx1[1], min( t_vtx2[1], t_vtx3[1] ));
 
-    int max_x = round(max( t_vtx1[0], max( t_vtx2[0], t_vtx3[0] )));
-    int max_y = round(max( t_vtx1[1], max( t_vtx2[1], t_vtx3[1] )));
+    int max_x = max( t_vtx1[0], max( t_vtx2[0], t_vtx3[0] ));
+    int max_y = max( t_vtx1[1], max( t_vtx2[1], t_vtx3[1] ));
 
     for (int y = min_y; y <= max_y; y++)
     {
         for (int x = min_x; x <= max_x; x++)
         {
-            double point[2] = {x, y};
+            double point[] = {x, y};
             double *bary = toBarycentric(t_vtx1, t_vtx2, t_vtx3, point);
 
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
             {
                 int newZ = t_vtx1[2] * bary[0] + t_vtx2[2] * bary[1] + t_vtx3[2] * bary[2];
-                uint32_t color = *getter(bary);
-                int idx = width * (y - 1) + x;
-
-                if (idx > 600000)
-                    printf("(%i, %i) -> %i\n", x, y, idx);
+                int idx = width * y + x;
 
                 if (newZ > z[idx])
                 {
+                    uint32_t color = *getter(bary);
+
                     image[idx] = color;
                     z[idx] = newZ;
                 }

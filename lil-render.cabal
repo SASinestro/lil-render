@@ -51,7 +51,6 @@ library
                       , vector-th-unbox  >= 0.2.1.6 && < 0.3
                       , template-haskell >= 2.10.0  && < 2.12
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , repa             >= 3.4     && < 3.5
                       , JuicyPixels      >= 3.2.7   && < 3.3
 
     default-extensions: DeriveGeneric
@@ -76,12 +75,13 @@ library
                       , ViewPatterns
                       , BangPatterns
                       , UnicodeSyntax
+                      , CPP
 
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
 
     hs-source-dirs:     src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
-    cc-options: -Wall -O3
+    cc-options: -Wall -O3 -g
     extra-libraries: m
 
     default-language:   Haskell2010
@@ -126,7 +126,6 @@ benchmark lil-render-bench
                       , vector-th-unbox  >= 0.2.1   && < 0.3
                       , template-haskell >= 2.10.0  && < 2.11
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , repa             >= 3.4     && < 3.5
                       , JuicyPixels      >= 3.2.7   && < 3.3
 
     default-extensions: DeriveGeneric
@@ -157,7 +156,7 @@ benchmark lil-render-bench
 
     hs-source-dirs:   bin, src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
-    cc-options: -Wall -O3
+    cc-options: -Wall -O3 -g
     extra-libraries: m
 
     default-language: Haskell2010

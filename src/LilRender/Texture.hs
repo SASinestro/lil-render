@@ -15,5 +15,5 @@ getColorFromTexture (Texture image@(Image _ width' height')) (TextureCoordinate 
         width = fromIntegral width'
         height = fromIntegral height'
 
-loadTexture :: ImageFormat -> FilePath -> IO Texture
-loadTexture format path = liftM Texture (loadImage format path)
+loadTexture :: FilePath -> IO Texture
+loadTexture = liftM Texture . loadImage

@@ -1,6 +1,5 @@
 module Bench.Triangles where
 
-import           Control.Monad
 import           Criterion
 import qualified LilRender.Color.Named             as NC
 import           LilRender.Image
@@ -14,7 +13,7 @@ triangleDrawEnv = do
     tri <- generate (arbitrary :: Gen (Triangle (Screen (Point3 Double))))
     return (img, tri)
 
-benchTriangleDraw = env triangleDrawEnv $ bench "Draw triangle" . nfIO . \(image, tri) -> do
+benchTriangleDraw = env triangleDrawEnv $ bench "Draw triangle" . nfIO . \(image, tri) ->
     drawFilledTriangle image (\_ -> Just NC.red) tri :: IO ()
 
 triangles = bgroup "Triangles" [ benchTriangleDraw ]

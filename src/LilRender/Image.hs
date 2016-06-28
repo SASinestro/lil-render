@@ -11,16 +11,16 @@ module LilRender.Image (
     , drawImageWith
     ) where
 
-import Control.Monad              (liftM)
-
-import LilRender.Image.Format.TGA (readTGAIO, writeTGA)
 import LilRender.Image.Immutable
 import LilRender.Image.Mutable
+import LilRender.Image.STB
 
-data ImageFormat = TGA
+data ImageFormat = TGA | PNG | BMP
 
-loadImage :: ImageFormat -> FilePath -> IO Image
-loadImage TGA = liftM toImage . readTGAIO
+loadImage :: FilePath -> IO Image
+loadImage = stbLoadImage
 
 saveImage :: ImageFormat -> FilePath -> Image -> IO ()
-saveImage TGA path img = writeTGA path $ fromImage img
+saveImage TGA = stbWriteTGA
+saveImage PNG = stbWritePNG
+saveImage BMP = stbWriteBMP

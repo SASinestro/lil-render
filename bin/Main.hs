@@ -29,7 +29,7 @@ scale' factor a = round ((fromIntegral a) * factor)
 main :: IO ()
 main = do
     model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
-    texture <- loadTexture TGA "data/african_head/african_head_diffuse.tga"
+    texture <- loadTexture "data/african_head/african_head_diffuse.tga"
 
     let cameraLocation = World (Point3 1.0 1.0 3.0)
     let cameraTarget   = World (Point3 0.0 0.0 0.0)

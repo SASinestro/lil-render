@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #define min(a, b) ((a < b) ? a : b)
 #define max(a, b) ((a > b) ? a : b)
@@ -62,10 +63,13 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
 
                 if (newZ > z[idx])
                 {
-                    uint32_t color = *getter(bary);
+                    char *color = getter(bary);
 
-                    image[idx] = color;
-                    z[idx] = newZ;
+                    if (color[0])
+                    {
+                        memcpy(&image[idx], &color[1], 3);
+                        z[idx] = newZ;
+                    }
                 }
             }
         }

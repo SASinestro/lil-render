@@ -2,12 +2,10 @@ module Bench.Macro where
 
 import           Criterion
 
-import qualified Data.ByteString            as BS
 import qualified Data.Text.IO               as T
 
 import qualified LilRender.Color.Named      as NC
 import           LilRender.Image
-import           LilRender.Image.Format.TGA
 import           LilRender.Math.Geometry
 import           LilRender.Math.Transform
 import           LilRender.Math.Vector
@@ -19,11 +17,11 @@ import           LilRender.Texture
 
 benchLoadModel = env (T.readFile "data/african_head/african_head.obj") $ bench "Load model from .obj" . nf loadWavefrontObj
 
-benchLoadTexture = env (BS.readFile "data/african_head/african_head_diffuse.tga") $ bench "Load texture from TGA" . whnf readTGA
+benchLoadTexture = bench "Load texture from TGA" $ whnf loadImage "data/african_head/african_head_diffuse.tga"
 
 drawENV width height = do
     model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
-    texture <- loadTexture TGA "data/african_head/african_head_diffuse.tga"
+    texture <- loadTexture "data/african_head/african_head_diffuse.tga"
 
     let cameraLocation = World (Point3 1.0 1.0 3.0)
     let cameraTarget   = World (Point3 0.0 0.0 0.0)

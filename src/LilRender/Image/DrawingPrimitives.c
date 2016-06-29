@@ -59,10 +59,7 @@ void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1,
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
             {
                 int newZ = t_vtx1[2] * bary[0] + t_vtx2[2] * bary[1] + t_vtx3[2] * bary[2];
-                int idx = (x + y * width)*3;
-
-                if (idx > 1710000)
-                    printf("(%i, %i) -> %i\n", x, y, idx);
+                int idx = (x + y * width);
 
                 if (newZ > z[idx])
                 {
@@ -70,13 +67,14 @@ void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1,
 
                     if (color[0])
                     {
-                        memcpy(&image[idx], &color[1], 3);
+                        image[idx + 0] = color[1];
+                        image[idx + 1] = color[2];
+                        image[idx + 2] = color[3];
+
                         z[idx] = newZ;
                     }
                 }
             }
         }
     }
-
-    printf("Done with C!\n");
 }

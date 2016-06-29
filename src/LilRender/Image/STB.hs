@@ -1,5 +1,6 @@
 module LilRender.Image.STB (stbLoadImage, stbWritePNG, stbWriteBMP, stbWriteTGA) where
 
+import LilRender.Color
 import LilRender.Image.Immutable
 
 import qualified Data.Vector.Storable    as V
@@ -37,7 +38,7 @@ stbLoadImage path = do
     free heightPtr
     free nComponentsPtr
 
-    return $ Image (V.unsafeCast storage) width height
+    return $ Image (V.unsafeCast storage :: V.Vector RGBColor) width height
 
 stbWritePNG :: FilePath -> Image -> IO ()
 stbWritePNG path (Image storage width height) = do

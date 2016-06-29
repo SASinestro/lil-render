@@ -13,7 +13,7 @@ import           LilRender.Shader
 import           LilRender.Texture
 
 import           Control.Monad.Primitive
-import qualified Data.Vector.Unboxed.Mutable as MV
+import qualified Data.Vector.Mutable as MV
 
 data GouraudShader st = GouraudShader {
       _gouraudStateVector           :: MV.MVector st Double

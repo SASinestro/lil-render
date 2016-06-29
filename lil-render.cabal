@@ -33,8 +33,7 @@ library
     other-modules:      LilRender.Image.DrawingPrimitives
                       , LilRender.Image.Mutable
                       , LilRender.Image.Immutable
-                      , LilRender.Image.STB
-                      , LilRender.Image.Format.TGA
+                      , LilRender.Image.STB  
                       , LilRender.Model.Internal
                       , LilRender.Model.Wavefront
 

@@ -5,5 +5,5 @@
 
 typedef char *(*ColorGetter)(double *);
 
-void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3);
+void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3);
 #endif

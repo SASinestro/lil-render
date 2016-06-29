@@ -41,7 +41,7 @@ double *toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *po
     return out;
 }
 
-void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
+void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
 {
     int min_x = min( t_vtx1[0], min( t_vtx2[0], t_vtx3[0] ));
     int min_y = min( t_vtx1[1], min( t_vtx2[1], t_vtx3[1] ));
@@ -59,7 +59,10 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
             {
                 int newZ = t_vtx1[2] * bary[0] + t_vtx2[2] * bary[1] + t_vtx3[2] * bary[2];
-                int idx = width * y + x;
+                int idx = (x + y * width)*3;
+
+                if (idx > 1710000)
+                    printf("(%i, %i) -> %i\n", x, y, idx);
 
                 if (newZ > z[idx])
                 {
@@ -74,4 +77,6 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
             }
         }
     }
+
+    printf("Done with C!\n");
 }

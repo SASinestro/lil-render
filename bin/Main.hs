@@ -50,4 +50,4 @@ main = do
 
     putStrLn $ "Frame time: " ++ secs (endTime - startTime)
 
-    saveImage TGA "head.tga" image
+    saveImage PNG "head.png" image

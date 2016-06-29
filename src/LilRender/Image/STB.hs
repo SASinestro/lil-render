@@ -47,7 +47,7 @@ stbWritePNG path (Image storage width height) = do
     let h = fromIntegral height :: CInt
 
     withForeignPtr (fst $ V.unsafeToForeignPtr0 storage) (\pixBuf ->
-        stbi_write_png cPath w h 3 (castPtr pixBuf) (w * h * 3) -- bytes per row
+        stbi_write_png cPath w h 3 (castPtr pixBuf) (w * 3) -- bytes per row
         )
 
     free cPath

@@ -33,35 +33,35 @@ instance Storable RGBColor where
     alignment _ = alignment (undefined :: Word8)
     peek ptr = do
         let ptr' = castPtr ptr :: Ptr Word8
-        red <- peek ptr'
-        green <- peek ptr'
-        blue <- peek ptr'
+        red   <- peekElemOff ptr' 0
+        green <- peekElemOff ptr' 1
+        blue  <- peekElemOff ptr' 2
         return $ RGBColor blue green red
     poke ptr (RGBColor blue green red) = do
         let ptr' = castPtr ptr :: Ptr Word8
-        poke ptr' red
-        poke ptr' green
-        poke ptr' blue
+        pokeElemOff ptr' 0 red
+        pokeElemOff ptr' 1 green
+        pokeElemOff ptr' 2 blue
 
 instance Storable (Maybe RGBColor) where
     sizeOf _ = 4 * sizeOf (undefined :: Word8)
     alignment _ = alignment (undefined :: Word8)
     peek ptr = do
         let ptr' = castPtr ptr :: Ptr Word8
-        isValid <- peek ptr'
-        red <- peek ptr'
-        green <- peek ptr'
-        blue <- peek ptr'
+        isValid <- peekElemOff ptr' 0
+        red     <- peekElemOff ptr' 1
+        green   <- peekElemOff ptr' 2
+        blue    <- peekElemOff ptr' 3
         return $ if isValid > 0 then Just (RGBColor blue green red) else Nothing
     poke ptr (Just (RGBColor blue green red)) = do
         let ptr' = castPtr ptr :: Ptr Word8
-        poke ptr' 1 -- it's valid
-        poke ptr' red
-        poke ptr' green
-        poke ptr' blue
+        pokeElemOff ptr' 0 1 -- it's valid
+        pokeElemOff ptr' 1 red
+        pokeElemOff ptr' 2 green
+        pokeElemOff ptr' 3 blue
     poke ptr Nothing = do
         let ptr' = castPtr ptr :: Ptr Word8
-        poke ptr' 0
-        poke ptr' 0
-        poke ptr' 0
-        poke ptr' 0
+        pokeElemOff ptr' 0 0 -- Four zero bytes = Nothing
+        pokeElemOff ptr' 1 0
+        pokeElemOff ptr' 2 0
+        pokeElemOff ptr' 3 0

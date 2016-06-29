@@ -34,6 +34,7 @@ library
                       , LilRender.Image.Mutable
                       , LilRender.Image.Immutable
                       , LilRender.Image.STB
+                      , LilRender.Image.Format.TGA
                       , LilRender.Model.Internal
                       , LilRender.Model.Wavefront
 
@@ -76,10 +77,10 @@ library
                       , BangPatterns
                       , UnicodeSyntax
                       , CPP
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -g
     hs-source-dirs:     src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c src/LilRender/Image/stb_image.c
-    cc-options: -Wall -O3 -msse2
+    cc-options: -Wall -O3 -msse2 -g
     include-dirs: deps
     extra-libraries: m
 
@@ -104,10 +105,14 @@ executable lil-render
                        , UnicodeSyntax
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     ghc-options: -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
 =======
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts
 >>>>>>> 2ee2d3e... Remove -g from cabal file (It doesn't work right anyway)
+=======
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
+>>>>>>> 95e9816... this should almost work
 
     hs-source-dirs:     bin
     default-language:   Haskell2010

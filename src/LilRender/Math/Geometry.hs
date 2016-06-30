@@ -3,8 +3,6 @@ module LilRender.Math.Geometry where
 import Control.DeepSeq
 import Control.Monad
 import Data.Ix
-import Data.Vector.Unboxed          (Unbox)
-import Data.Vector.Unboxed.Deriving
 import GHC.Generics
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
@@ -29,11 +27,6 @@ instance (Storable a) => Storable (Point2 a) where
         let ptr' = castPtr ptr :: Ptr a
         pokeElemOff ptr' 0 a
         pokeElemOff ptr' 1 b
-
-derivingUnbox "Point2"
-    [t| forall a. (Unbox a) => Point2 a -> (a, a) |]
-    [| \(Point2 x y) -> (x, y) |]
-    [| \(x, y) -> (Point2 x y) |]
 
 instance (Ix a) => Ix (Point2 a) where
     range (Point2 p1x p1y, Point2 p2x p2y) = [Point2 i1 i2 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y)]
@@ -61,11 +54,6 @@ instance (Storable a) => Storable (Point3 a) where
         pokeElemOff ptr' 0 a
         pokeElemOff ptr' 1 b
         pokeElemOff ptr' 2 c
-
-derivingUnbox "Point3"
-    [t| forall a. (Unbox a) => Point3 a -> (a, a, a) |]
-    [| \(Point3 x y z) -> (x, y, z) |]
-    [| \(x, y, z) -> (Point3 x y z) |]
 
 instance (Ix a) => Ix (Point3 a) where
     range   (Point3 p1x p1y p1z, Point3 p2x p2y p2z) = [Point3 i1 i2 i3 | i1 <- range (p1x, p2x), i2 <- range (p1y, p2y), i3 <- range (p1z, p2z)]

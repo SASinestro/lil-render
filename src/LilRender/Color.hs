@@ -3,9 +3,13 @@ module LilRender.Color (RGBColor(..), scaleColor) where
 import Control.DeepSeq
 import Data.Word
 import GHC.Generics                 (Generic)
+import Text.Printf
+
+import Foreign.C
+import Foreign.Marshal
 import Foreign.Ptr
 import Foreign.Storable
-import Text.Printf
+import System.IO.Unsafe
 
 data RGBColor = RGBColor {
       _blue  :: !Word8
@@ -18,13 +22,15 @@ instance NFData RGBColor
 instance Show RGBColor where
     show (RGBColor blue green red) = printf "(#%02X%02X%02X)" red green blue
 
+foreign import ccall "src/LilRender/Color/scale.h scale_color" scaleColorC :: Ptr CUChar -> CDouble -> Ptr CUChar -> IO ()
+
 scaleColor ∷ RGBColor → Double → RGBColor
-scaleColor (RGBColor b g r) factor = RGBColor (round r') (round g') (round b')
-    where
-        factor' = max 0 $ min 1 factor
-        r' = factor' * fromIntegral r
-        g' = factor' * fromIntegral g
-        b' = factor' * fromIntegral b
+scaleColor color factor = unsafePerformIO $ alloca (\out -> do
+    colorPtr <- castPtr <$> new color :: IO (Ptr CUChar)
+    let cFactor = realToFrac factor :: CDouble
+    scaleColorC colorPtr cFactor out
+    peek (castPtr out :: Ptr RGBColor)
+    )
 
 --
 

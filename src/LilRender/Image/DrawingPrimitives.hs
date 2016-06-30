@@ -3,7 +3,6 @@ module LilRender.Image.DrawingPrimitives (drawFilledTriangle
     ) where
 
 import           Control.Monad.Primitive
-import qualified Data.Vector.Storable         as V
 import qualified Data.Vector.Storable.Mutable as MV
 
 import Foreign.C

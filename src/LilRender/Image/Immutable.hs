@@ -28,6 +28,7 @@ instance NFData Image
 
 type ImageIndexType = Screen (Point2 Int)
 
+{-# INLINE (<!>) #-}
 (<!>) :: Image -> ImageIndexType -> RGBColor
 Image { _storage = storage,  _width = width } <!> (Screen (Point2 x y)) = storage `V.unsafeIndex` (width * y + x)
 

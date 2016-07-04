@@ -138,5 +138,5 @@ viewportTransform' (Screen (Point2 x' y')) width height depth =
         x = fromIntegral x'
         y = fromIntegral y'
 
-viewportTransform :: CenterPoint → Width → Height → Transform (Clip (Point3 Double)) (Screen (Point3 Double))
+viewportTransform :: CenterPoint -> Width -> Height -> Transform (Clip (Point3 Double)) (Screen (Point3 Double))
 viewportTransform center width height = viewportTransform' center width height 255

@@ -24,7 +24,7 @@ instance Show RGBColor where
 
 foreign import ccall "src/LilRender/Color/scale.h scale_color" scaleColorC :: Ptr CUChar -> CDouble -> Ptr CUChar -> IO ()
 
-scaleColor ∷ RGBColor → Double → RGBColor
+scaleColor ∷ RGBColor -> Double -> RGBColor
 scaleColor color factor = unsafePerformIO $ alloca (\out -> do
     colorPtr <- castPtr <$> new color :: IO (Ptr CUChar)
     let cFactor = realToFrac factor :: CDouble

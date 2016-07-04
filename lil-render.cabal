@@ -70,13 +70,16 @@ library
                       , OverloadedStrings
                       , ViewPatterns
                       , BangPatterns
-                      , UnicodeSyntax
                       , CPP
 
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -g
 
     hs-source-dirs:     src
-    c-sources:  src/LilRender/Color/scale.c src/LilRender/Image/DrawingPrimitives.c src/LilRender/Image/stb_image.c
+    c-sources:
+        src/LilRender/Color/scale.c
+        src/LilRender/Image/DrawingPrimitives.c
+        src/LilRender/Image/stb_image.c
+        src/LilRender/Math/matrix.c
     cc-options: -Wall -O3 -msse2 -g
     include-dirs: deps
     extra-libraries: m
@@ -99,7 +102,6 @@ executable lil-render
                        , OverloadedStrings
                        , TypeFamilies
                        , GADTs
-                       , UnicodeSyntax
 
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
 
@@ -142,13 +144,16 @@ benchmark lil-render-bench
                       , OverloadedStrings
                       , ViewPatterns
                       , BangPatterns
-                      , UnicodeSyntax
                       , CPP
 
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -main-is Bench.main -rtsopts
 
     hs-source-dirs:   bin, src
-    c-sources:  src/LilRender/Color/scale.c src/LilRender/Image/DrawingPrimitives.c src/LilRender/Image/stb_image.c
+    c-sources:
+        src/LilRender/Color/scale.c
+        src/LilRender/Image/DrawingPrimitives.c
+        src/LilRender/Image/stb_image.c
+        src/LilRender/Math/matrix.c
     cc-options: -Wall -O3 -msse2
     include-dirs: deps
     extra-libraries: m

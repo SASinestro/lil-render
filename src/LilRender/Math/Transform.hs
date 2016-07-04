@@ -32,6 +32,8 @@ class Transformable a where
     fromMatrix :: Matrix Double -> a
 
 instance Transformable (Point3 Double) where
+    {-# INLINE toMatrix #-}
+    {-# INLINE fromMatrix #-}
     toMatrix (Point3 a b c) = Matrix (V.fromList [a, b, c, 1]) 4 1
     fromMatrix mat@(Matrix _ cols rows)
         | cols == 4 && rows == 1 = Point3 (a / d) (b / d) (c / d)
@@ -43,6 +45,8 @@ instance Transformable (Point3 Double) where
                 d = mat `mIndex` (4, 1)
 
 instance Transformable (Vector3 Double) where
+    {-# INLINE toMatrix #-}
+    {-# INLINE fromMatrix #-}
     toMatrix (Vector3 a b c) = Matrix (V.fromList [a, b, c, 1]) 4 1
     fromMatrix mat@(Matrix _ cols rows)
         | cols == 4 && rows == 1 = Vector3 (a / d) (b / d) (c / d)
@@ -59,6 +63,7 @@ deriving instance (Transformable a) => Transformable (Camera a)
 deriving instance (Transformable a) => Transformable (Clip a)
 deriving instance (Transformable a) => Transformable (Screen a)
 
+{-# INLINE transform #-}
 transform :: (Transformable a, Transformable b) => Transform a b -> a -> b
 transform (Transform mat) a =  fromMatrix (mMult mat (toMatrix a))
 
@@ -67,7 +72,7 @@ transformBy = flip transform
 
 infixr 1 >>>
 (>>>) :: (Transformable a, Transformable b, Transformable c) => Transform a b -> Transform b c -> Transform a c
-(Transform a) >>> (Transform b) =  Transform $ mMult b a
+!(Transform a) >>> !(Transform b) =  Transform $ mMult b a
 
 identityTransform :: (Transformable a, Transformable b) => Transform a b
 identityTransform = Transform $ identityMatrix 4

@@ -5,11 +5,11 @@ import Control.Monad
 import Data.Ix
 import Data.Vector.Unboxed          (Unbox)
 import Data.Vector.Unboxed.Deriving
+import Foreign.Ptr
+import Foreign.Storable
 import GHC.Generics
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
-import Foreign.Storable
-import Foreign.Ptr
 
 data Point2 a = Point2 {
       _p2_x :: !a
@@ -94,5 +94,6 @@ instance (NFData a) => NFData (Triangle a)
 instance (Arbitrary a) => Arbitrary (Triangle a) where
   arbitrary = liftM3 Triangle arbitrary arbitrary arbitrary
 
+{-# INLINE triangularInterpolate #-}
 triangularInterpolate :: Double -> Double -> Double -> Barycentric (Point3 Double) -> Double
 triangularInterpolate a b c (Barycentric (Point3 lambda1 lambda2 lambda3)) = a * lambda1 + b * lambda2 + c * lambda3

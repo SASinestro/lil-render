@@ -2,9 +2,9 @@ module LilRender.Color (RGBColor(..), scaleColor) where
 
 import Control.DeepSeq
 import Data.Word
-import GHC.Generics                 (Generic)
 import Foreign.Ptr
 import Foreign.Storable
+import GHC.Generics     (Generic)
 import Text.Printf
 
 data RGBColor = RGBColor {
@@ -18,6 +18,7 @@ instance NFData RGBColor
 instance Show RGBColor where
     show (RGBColor blue green red) = printf "(#%02X%02X%02X)" red green blue
 
+{-# INLINE scaleColor #-}
 scaleColor ∷ RGBColor → Double → RGBColor
 scaleColor (RGBColor b g r) factor = RGBColor (round r') (round g') (round b')
     where

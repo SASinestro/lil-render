@@ -7,18 +7,18 @@ module LilRender.Math.Matrix (
     , identityMatrix
 )where
 
-import           Control.Arrow   (first)
+import           Control.Arrow        (first)
 import           Control.DeepSeq
-import qualified Data.Ix         as Ix
-import           Data.Vector.Storable     ((!), (//))
-import qualified Data.Vector.Storable     as V
+import qualified Data.Ix              as Ix
+import           Data.Vector.Storable ((!), (//))
+import qualified Data.Vector.Storable as V
 import           GHC.Generics
 
-import Foreign.C
-import Foreign.ForeignPtr
-import Foreign.Marshal
-import Foreign.Ptr
-import System.IO.Unsafe
+import           Foreign.C
+import           Foreign.ForeignPtr
+import           Foreign.Marshal
+import           Foreign.Ptr
+import           System.IO.Unsafe
 
 data Matrix a = Matrix {
           _mStorage :: V.Vector a
@@ -57,21 +57,10 @@ mUpdate (Matrix storage cols rows) changes = Matrix (storage // fmap (first idx)
 
 foreign import ccall unsafe "src/LilRender/Math/matrix.h matmult4x4" matmult4x4 :: Ptr CDouble -> Ptr CDouble -> Ptr CDouble -> IO ()
 
-{-# NOINLINE mMult #-}
 mMult :: Matrix Double -> Matrix Double -> Matrix Double
 mMult a@(Matrix as ax ay) b@(Matrix bs bx by)
     | ay /= bx = error $ "Matrix conformality error: trying to multiply a " ++ show ax ++ "x" ++ show ay
                                                        ++ " matrix with a " ++ show bx ++ "x" ++ show by ++ " matrix."
-    | ax == 4 && ay == 4 &&
-      bx == 4 && by == 4 =
-            unsafePerformIO $ withForeignPtr (fst . V.unsafeToForeignPtr0 $ realToFrac `V.map` as) (\asPtr ->
-                withForeignPtr (fst . V.unsafeToForeignPtr0 $ realToFrac `V.map` bs) (\bsPtr -> do
-                    outPtr <- mallocArray 16
-                    matmult4x4 asPtr bsPtr outPtr
-                    outFPtr <- newForeignPtr finalizerFree outPtr
-                    return $ Matrix (realToFrac `V.map` V.unsafeFromForeignPtr0 outFPtr 16) ax by
-                    )
-                )
     | otherwise = Matrix (V.fromList [sum [a `mIndex` (i, k) * (b `mIndex` (k, j)) | k <- [1 .. ay]]
                                                                                    | j <- [1 .. by],
                                                                                      i <- [1 .. ax]]) ax by

@@ -1,6 +1,7 @@
 module Bench where
 
 import Bench.Macro
+import Bench.Matrix
 import Bench.Triangles
 
 import Criterion.Main
@@ -12,4 +13,5 @@ main :: IO ()
 main = defaultMain [
       macro width height
      , triangles
+     , matrix
     ]

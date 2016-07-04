@@ -23,4 +23,6 @@ cabal.project.local
 .DS_Store
 *.obj
 *.tga
+*.png
+*.bmp
 !data/*/*

@@ -10,9 +10,9 @@ module LilRender.Math.Vector (
     ) where
 
 import Control.DeepSeq
-import GHC.Generics
 import Foreign.Ptr
 import Foreign.Storable
+import GHC.Generics
 
 
 data Vector2 a = Vector2 {
@@ -24,11 +24,13 @@ instance (NFData a) => NFData (Vector2 a)
 instance (Storable a) => Storable (Vector2 a) where
     sizeOf _ = 2 * sizeOf (undefined :: a)
     alignment _ = alignment (undefined :: a)
+    {-# INLINE peek #-}
     peek ptr = do
         let ptr' = castPtr ptr :: Ptr a
         a <- peekElemOff ptr' 0
         b <- peekElemOff ptr' 1
         return $ Vector2 a b
+    {-# INLINE poke #-}
     poke ptr (Vector2 a b) = do
         let ptr' = castPtr ptr :: Ptr a
         pokeElemOff ptr' 0 a
@@ -44,12 +46,14 @@ instance (NFData a) => NFData (Vector3 a)
 instance (Storable a) => Storable (Vector3 a) where
     sizeOf _ = 3 * sizeOf (undefined :: a)
     alignment _ = alignment (undefined :: a)
+    {-# INLINE peek #-}
     peek ptr = do
         let ptr' = castPtr ptr :: Ptr a
         a <- peekElemOff ptr' 0
         b <- peekElemOff ptr' 1
         c <- peekElemOff ptr' 2
         return $ Vector3 a b c
+    {-# INLINE poke #-}
     poke ptr (Vector3 a b c) = do
         let ptr' = castPtr ptr :: Ptr a
         pokeElemOff ptr' 0 a
@@ -94,14 +98,19 @@ instance (Num a) => VectorMath Vector2 a where
 
 instance (Num a) => VectorMath Vector3 a where
     zeroVect = Vector3 0 0 0
+
+    {-# INLINE dotVect #-}
     dotVect (Vector3 a1 a2 a3) (Vector3 b1 b2 b3) = a1 * b1 + a2 * b2 + a3 * b3
     scaleVect vect scale = (* scale) <$> vect
 
+{-# INLINE magnitudeVect #-}
 magnitudeVect :: (VectorMath v a, Floating a, Foldable v) => v a -> a
 magnitudeVect = sqrt . foldr (\a b -> a ** 2 + b) 0
 
+{-# INLINE normalizeVect #-}
 normalizeVect :: (VectorMath v a, Floating a, Foldable v) => v a -> v a
 normalizeVect vect = vect `scaleVect` (1 / magnitudeVect vect)
 
+{-# INLINE crossVect #-}
 crossVect :: Num a => Vector3 a -> Vector3 a -> Vector3 a
 crossVect (Vector3 a1 a2 a3) (Vector3 b1 b2 b3) = Vector3 (a2 * b3 - a3 * b2) (a3 * b1 - a1 * b3) (a1 * b2 - a2 * b1)

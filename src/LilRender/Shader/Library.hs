@@ -4,7 +4,7 @@ module LilRender.Shader.Library (
     ) where
 
 import           LilRender.Color
-import qualified LilRender.Color.Named       as NC
+import qualified LilRender.Color.Named    as NC
 import           LilRender.Math.Geometry
 import           LilRender.Math.Transform
 import           LilRender.Math.Vector
@@ -13,7 +13,7 @@ import           LilRender.Shader
 import           LilRender.Texture
 
 import           Control.Monad.Primitive
-import qualified Data.Vector.Unboxed.Mutable as MV
+import qualified Data.Vector.Mutable      as MV
 
 data GouraudShader st = GouraudShader {
       _gouraudStateVector           :: MV.MVector st Double
@@ -22,11 +22,13 @@ data GouraudShader st = GouraudShader {
 }
 
 instance Shader GouraudShader where
+    {-# INLINE vertexShader #-}
     vertexShader (GouraudShader state (World lightDirection) modelToWorldTransform) vertex@(Vertex _ _ (Just (VertexNormal modelNormal))) nthVertex = do
         let (World worldNormal) = transform modelToWorldTransform modelNormal
         MV.write state nthVertex (dotVect worldNormal lightDirection)
         return vertex
 
+    {-# INLINE fragmentShader #-}
     fragmentShader GouraudShader { _gouraudStateVector = state } _ = do
         n1 <- MV.read state 0
         n2 <- MV.read state 1
@@ -45,11 +47,13 @@ data PhongShader st = PhongShader {
 }
 
 instance Shader PhongShader where
+    {-# INLINE vertexShader #-}
     vertexShader (PhongShader state (World lightDirection) modelToWorldTransform) vertex@(Vertex _ (Just (TextureCoordinate textureCoord)) (Just (VertexNormal modelNormal))) nthVertex = do
         let (World worldNormal) = transform modelToWorldTransform modelNormal
         MV.write state nthVertex (dotVect worldNormal lightDirection, textureCoord)
         return vertex
 
+    {-# INLINE fragmentShader #-}
     fragmentShader PhongShader { _phongStateVector = state } texture = do
         (n1, Point2 t1x t1y) <- MV.read state 0
         (n2, Point2 t2x t2y) <- MV.read state 1

@@ -35,7 +35,7 @@ loadModel WavefrontOBJ path = do
     return model
 #endif
 
-
+{-# INLINE faceToTriangle #-}
 faceToTriangle :: Face -> Triangle (ModelSpace (Point3 Double))
 faceToTriangle (Face
                 (Vertex (VertexPoint p1) _ _)

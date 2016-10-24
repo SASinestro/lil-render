@@ -67,7 +67,7 @@ transformBy = flip transform
 
 infixr 1 >>>
 (>>>) :: (Transformable a, Transformable b, Transformable c) => Transform a b -> Transform b c -> Transform a c
-(Transform a) >>> (Transform b) =  Transform $ mMult b a
+(>>>) (Transform a) (Transform b) = Transform $ mMult b a
 
 identityTransform :: (Transformable a, Transformable b) => Transform a b
 identityTransform = Transform $ identityMatrix 4

@@ -10,6 +10,7 @@ import           LilRender.Renderer
 import           LilRender.Shader.Library
 import           LilRender.Texture
 
+import Control.Monad
 import           Criterion.Measurement    (getTime, initializeTime, secs)
 
 width = 800
@@ -28,8 +29,8 @@ scale' factor a = round ((fromIntegral a) * factor)
 
 main :: IO ()
 main = do
-    model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
-    texture <- loadTexture TGA "data/african_head/african_head_diffuse.tga"
+    !model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
+    !texture <- loadTexture TGA "data/african_head/african_head_diffuse.tga"
 
     let cameraLocation = World (Point3 1.0 1.0 3.0)
     let cameraTarget   = World (Point3 0.0 0.0 0.0)
@@ -40,14 +41,15 @@ main = do
 
     let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> (orthographicProjectionTransform cameraLocation) >>> viewport
 
-    shader <- phongShader (normalizeVect <$> lightDirection) identityTransform
+    !shader <- phongShader (normalizeVect <$> lightDirection) identityTransform
 
     initializeTime
 
-    startTime <- getTime
-    image <- drawImageWith width height NC.royalBlue (\image -> drawTexturedModel image model texture shader modelToScreen)
-    endTime <- getTime
+    replicateM_ 15 $ do
+        startTime <- getTime
+        !image <- drawImageWith width height NC.royalBlue (\image -> drawTexturedModel image model texture shader modelToScreen)
+        endTime <- getTime
 
-    putStrLn $ "Frame time: " ++ secs (endTime - startTime)
+        putStrLn $ "Frame time: " ++ secs (endTime - startTime)
 
-    saveImage TGA "head.tga" image
+        saveImage TGA "head.tga" image

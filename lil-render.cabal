@@ -46,12 +46,10 @@ library
                       , criterion        >= 1.1.1   && < 1.2
                       , attoparsec       >= 0.13.0  && < 0.14
                       , text             >= 1.2.2   && < 1.3
-                      , store            >= 0.2.0.0 && < 0.3
-                      , th-utilities     >= 0.1.0   && < 0.2
                       , vector-th-unbox  >= 0.2.1.6 && < 0.3
-                      , template-haskell >= 2.10.0  && < 2.12
+                      , store            >= 0.2.0.0 && < 0.3
+                      , th-utilities     >= 0.1.0   && < 0.3
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , JuicyPixels      >= 3.2.7   && < 3.3
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings
@@ -76,10 +74,11 @@ library
                       , BangPatterns
                       , UnicodeSyntax
                       , CPP
-    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -g
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -g
     hs-source-dirs:     src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
-    cc-options: -Wall -O3 -g
+    cc-options: -Wall -mavx -mavx2 -mfma -O3 -ffp-contract=fast -ffast-math
+    include-dirs: deps
     extra-libraries: m
 
     default-language:   Haskell2010
@@ -102,7 +101,7 @@ executable lil-render
                        , GADTs
                        , UnicodeSyntax
 
-    ghc-options: -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -threaded -g
 
     hs-source-dirs:     bin
     default-language:   Haskell2010
@@ -119,12 +118,10 @@ benchmark lil-render-bench
                       , criterion        >= 1.1.1   && < 1.2
                       , attoparsec       >= 0.13.0  && < 0.14
                       , text             >= 1.2.2   && < 1.3
-                      , store            >= 0.2.0   && < 0.3
-                      , th-utilities     >= 0.1.0   && < 0.2
-                      , vector-th-unbox  >= 0.2.1   && < 0.3
-                      , template-haskell >= 2.10.0  && < 2.11
+                      , store            >= 0.2.0.0 && < 0.3
+                      , th-utilities     >= 0.1.0   && < 0.3
+                      , vector-th-unbox  >= 0.2.1.6 && < 0.3
                       , QuickCheck       >= 2.8.2   && < 2.9
-                      , JuicyPixels      >= 3.2.7   && < 3.3
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings
@@ -149,10 +146,11 @@ benchmark lil-render-bench
                       , BangPatterns
                       , UnicodeSyntax
                       , CPP
-    ghc-options: -main-is Bench -O2 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -Odph -rtsopts -threaded -fno-liberate-case -fexpose-all-unfoldings -funfolding-use-threshold16 -funfolding-keeness-factor1000 -fsimpl-tick-factor=500 -fllvm -pgmlo opt-3.5 -pgmlc llc-3.5 -optlo-O3
+    ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -threaded -g
     hs-source-dirs:   bin, src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c
-    cc-options: -Wall -O3 -g
+    cc-options: -Wall -mcpu=tune -O3 -ffp-contract=fast -ffast-math
+    include-dirs: deps
     extra-libraries: m
 
     default-language: Haskell2010

@@ -3,15 +3,14 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #define min(a, b) ((a < b) ? a : b)
 #define max(a, b) ((a > b) ? a : b)
 
-double *toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *point)
+void toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *point, double *out)
 {
-    double *out = malloc(3 * sizeof(double));
-
     double v1x = t_vtx3[0] - t_vtx1[0];
     double v1y = t_vtx2[0] - t_vtx1[0];
     double v1z = t_vtx1[0] - point[0];
@@ -36,8 +35,6 @@ double *toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *po
         out[1] = (b/c);
         out[2] = (a/c);
     }
-
-    return out;
 }
 
 void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
@@ -48,12 +45,16 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
     int max_x = max( t_vtx1[0], max( t_vtx2[0], t_vtx3[0] ));
     int max_y = max( t_vtx1[1], max( t_vtx2[1], t_vtx3[1] ));
 
+    double bary[3];
+    bool lastIter = false;
+    uint32_t color;
+
     for (int y = min_y; y <= max_y; y++)
     {
         for (int x = min_x; x <= max_x; x++)
         {
             double point[] = {x, y};
-            double *bary = toBarycentric(t_vtx1, t_vtx2, t_vtx3, point);
+            toBarycentric(t_vtx1, t_vtx2, t_vtx3, point, bary);
 
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
             {
@@ -62,12 +63,22 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
 
                 if (newZ > z[idx])
                 {
-                    uint32_t color = *getter(bary);
+                    getter(bary, &color);
 
                     image[idx] = color;
                     z[idx] = newZ;
                 }
+
+                lastIter = true;
             }
+            else
+            {
+                if (lastIter)
+                {
+                    continue;
+                }
+            }
+
         }
     }
 }

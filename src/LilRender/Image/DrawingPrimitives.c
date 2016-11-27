@@ -37,7 +37,7 @@ void toBarycentric(double *t_vtx1, double *t_vtx2, double *t_vtx3, double *point
     }
 }
 
-void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
+void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1, double *t_vtx2, double *t_vtx3)
 {
     int min_x = min( t_vtx1[0], min( t_vtx2[0], t_vtx3[0] ));
     int min_y = min( t_vtx1[1], min( t_vtx2[1], t_vtx3[1] ));
@@ -45,40 +45,34 @@ void drawTri(uint32_t *image, int *z, int width, ColorGetter getter, double *t_v
     int max_x = max( t_vtx1[0], max( t_vtx2[0], t_vtx3[0] ));
     int max_y = max( t_vtx1[1], max( t_vtx2[1], t_vtx3[1] ));
 
+    double point[2];
     double bary[3];
-    bool lastIter = false;
-    uint32_t color;
+    char color[3];
 
     for (int y = min_y; y <= max_y; y++)
     {
         for (int x = min_x; x <= max_x; x++)
         {
-            double point[] = {x, y};
+            point[0] = x;
+            point[1] = y;
             toBarycentric(t_vtx1, t_vtx2, t_vtx3, point, bary);
 
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
             {
                 int newZ = t_vtx1[2] * bary[0] + t_vtx2[2] * bary[1] + t_vtx3[2] * bary[2];
-                int idx = width * y + x;
+                int idx = (width * (width - (y + 1)) + x) * 3; // bpp
+                int zIdx = width * y + x;
 
-                if (newZ > z[idx])
+                if (newZ > z[zIdx])
                 {
-                    getter(bary, &color);
+                    getter(bary, color);
 
-                    image[idx] = color;
-                    z[idx] = newZ;
-                }
-
-                lastIter = true;
-            }
-            else
-            {
-                if (lastIter)
-                {
-                    continue;
+                    image[idx + 0] = color[0];
+                    image[idx + 1] = color[1];
+                    image[idx + 2] = color[2];
+                    z[zIdx] = newZ;
                 }
             }
-
         }
     }
 }

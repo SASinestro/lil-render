@@ -14,12 +14,12 @@ import           LilRender.Color
 import           LilRender.Image.Mutable
 import           LilRender.Math.Geometry
 
-foreign import ccall safe "src/LilRender/Image/DrawingPrimitives.h drawTri" drawTri :: Ptr RGBColor -> Ptr Int -> Int -> FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr (Maybe RGBColor) -> IO ()) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> IO ()
+foreign import ccall safe "src/LilRender/Image/DrawingPrimitives.h drawTri" drawTri :: Ptr RGBColor -> Ptr Int -> Int -> FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> IO ()
 
-foreign import ccall "wrapper" wrapColorGetter :: (Ptr (Barycentric (Point3 Double)) -> Ptr (Maybe RGBColor) -> IO ()) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr (Maybe RGBColor) -> IO ()))
+foreign import ccall "wrapper" wrapColorGetter :: (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()))
 
 {-# INLINE drawFilledTriangle #-}
-drawFilledTriangle :: MutableImage (PrimState IO) -> (Barycentric (Point3 Double) -> Maybe RGBColor) -> Triangle (Screen (Point3 Double)) -> IO ()
+drawFilledTriangle :: MutableImage (PrimState IO) RGBColor -> (Barycentric (Point3 Double) -> RGBColor) -> Triangle (Screen (Point3 Double)) -> IO ()
 drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle (Screen vertex1) (Screen vertex2) (Screen vertex3)) =
     withForeignPtr (fst $ MV.unsafeToForeignPtr0 pixels) (\pixBuf ->
             withForeignPtr (fst $ MV.unsafeToForeignPtr0 zBuffer) (\zBuf -> do
@@ -33,7 +33,7 @@ drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle (Scr
             )
 
 {-# INLINE wrapGetColor #-}
-wrapGetColor :: (Barycentric (Point3 Double) -> Maybe RGBColor) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr (Maybe RGBColor) -> IO ()))
+wrapGetColor :: (Barycentric (Point3 Double) -> RGBColor) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()))
 wrapGetColor getColor = wrapColorGetter (\ptr outptr -> do
     point <- peek ptr
     poke outptr $ getColor point

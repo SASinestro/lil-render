@@ -33,7 +33,7 @@ instance Shader GouraudShader where
         n1 <- MV.read state 0
         n2 <- MV.read state 1
         n3 <- MV.read state 2
-        return (\point -> Just $ NC.orange `scaleColor` triangularInterpolate n1 n2 n3 point)
+        return (\point -> NC.orange `scaleColor` triangularInterpolate n1 n2 n3 point)
 
 gouraudShader :: (PrimMonad m) => World (Vector3 Double) -> Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double)) -> m (GouraudShader (PrimState m))
 gouraudShader dir modelToWorld = do
@@ -64,7 +64,7 @@ instance Shader PhongShader where
             let ty = triangularInterpolate t1y t2y t3y point
             let color = getColorFromTexture texture (TextureCoordinate (Point2 tx ty))
 
-            Just (scaleColor color $ triangularInterpolate n1 n2 n3 point)
+            scaleColor color $ triangularInterpolate n1 n2 n3 point
             )
 
 phongShader :: (PrimMonad m) => World (Vector3 Double) -> Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double)) -> m (PhongShader (PrimState m))

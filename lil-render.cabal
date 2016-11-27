@@ -31,7 +31,6 @@ library
                       , LilRender.Shader.Library
 
     other-modules:      LilRender.Image.DrawingPrimitives
-                      , LilRender.Image.Format.TGA
                       , LilRender.Image.Mutable
                       , LilRender.Image.Immutable
                       , LilRender.Model.Internal
@@ -50,6 +49,7 @@ library
                       , store            >= 0.2.0.0 && < 0.3
                       , th-utilities     >= 0.1.0   && < 0.3
                       , QuickCheck       >= 2.8.2   && < 2.9
+                      , stb-image-redux  >= 0.2.0.0 && < 0.3
 
     default-extensions: DeriveGeneric
                       , OverloadedStrings
@@ -73,6 +73,7 @@ library
                       , ViewPatterns
                       , BangPatterns
                       , UnicodeSyntax
+                      , RecordWildCards
                       , CPP
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -g
     hs-source-dirs:     src
@@ -146,6 +147,7 @@ benchmark lil-render-bench
                       , BangPatterns
                       , UnicodeSyntax
                       , CPP
+                      , RecordWildCards
     ghc-options: -O2 -funfolding-use-threshold=16 -funbox-strict-fields -fwarn-unused-binds -fwarn-unused-imports -fprof-auto -fprof-cafs -rtsopts -threaded -g
     hs-source-dirs:   bin, src
     c-sources:  src/LilRender/Image/DrawingPrimitives.c

@@ -19,7 +19,6 @@ import           LilRender.Texture
 
 benchLoadModel = env (T.readFile "data/african_head/african_head.obj") $ bench "Load model from .obj" . nf loadWavefrontObj
 
-benchLoadTexture = env (BS.readFile "data/african_head/african_head_diffuse.tga") $ bench "Load texture from TGA" . whnf readTGA
 
 drawENV width height = do
     model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
@@ -49,6 +48,5 @@ benchDrawImage width height = env (drawENV width height) $ bench "Draw model in 
 
 macro width height = bgroup "Macro benchmarks" [
       benchLoadModel
-    , benchLoadTexture
     , benchDrawImage width height
     ]

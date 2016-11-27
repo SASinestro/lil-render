@@ -2,7 +2,7 @@ module LilRender.Renderer (drawTexturedModel) where
 
 import Control.Monad
 import Control.Monad.Primitive
-
+import LilRender.Color
 import LilRender.Image.DrawingPrimitives
 import LilRender.Image.Mutable
 import LilRender.Math.Geometry
@@ -12,13 +12,13 @@ import LilRender.Shader
 import LilRender.Texture
 
 drawTexturedModel :: (Shader shader) =>
-                    MutableImage (PrimState IO) -- Target
-                    -> Model -- The model to be rendered
+                       Model -- The model to be rendered
                     -> Texture -- The texture
                     -> shader (PrimState IO) -- The shader
                     -> Transform (ModelSpace (Point3 Double)) (Screen (Point3 Double)) -- The projection from ModelSpace to Screen
+                    -> MutableImage (PrimState IO) RGBColor -- Target
                     -> IO ()
-drawTexturedModel image (Model faces) texture shader projection =
+drawTexturedModel (Model faces) texture shader projection image =
     forM_ faces (\face -> do
         tri <- screenTriangleForFace face
         color <- fragmentShader shader texture

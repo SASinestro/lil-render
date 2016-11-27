@@ -17,14 +17,14 @@ import qualified Data.Vector.Mutable      as MV
 
 data GouraudShader st = GouraudShader {
       _gouraudStateVector           :: MV.MVector st Double
-    , _gouraudLightingDirection     :: World (Vector3 Double)
-    , _gouraudModelToWorldTransform :: Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double))
+    , _gouraudLightingDirection     :: Vector3 Double
+    , _gouraudModelToWorldTransform :: Transform (Vector3 Double) (Vector3 Double)
 }
 
 instance Shader GouraudShader where
     {-# INLINE vertexShader #-}
-    vertexShader (GouraudShader state (World lightDirection) modelToWorldTransform) vertex@(Vertex _ _ (Just (VertexNormal modelNormal))) nthVertex = do
-        let (World worldNormal) = transform modelToWorldTransform modelNormal
+    vertexShader (GouraudShader state lightDirection modelToWorldTransform) vertex@(Vertex _ _ (Just modelNormal)) nthVertex = do
+        let worldNormal = transform modelToWorldTransform modelNormal
         MV.write state nthVertex (dotVect worldNormal lightDirection)
         return vertex
 
@@ -35,21 +35,21 @@ instance Shader GouraudShader where
         n3 <- MV.read state 2
         return (\point -> NC.orange `scaleColor` triangularInterpolate n1 n2 n3 point)
 
-gouraudShader :: (PrimMonad m) => World (Vector3 Double) -> Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double)) -> m (GouraudShader (PrimState m))
+gouraudShader :: (PrimMonad m) => Vector3 Double -> Transform (Vector3 Double) (Vector3 Double) -> m (GouraudShader (PrimState m))
 gouraudShader dir modelToWorld = do
     state <- MV.new 3
     return $ GouraudShader state dir modelToWorld
 
 data PhongShader st = PhongShader {
       _phongStateVector           :: MV.MVector st (Double, Point2 Double)
-    , _phongLightingDirection     :: World (Vector3 Double)
-    , _phongModelToWorldTransform :: Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double))
+    , _phongLightingDirection     :: Vector3 Double
+    , _phongModelToWorldTransform :: Transform (Vector3 Double) (Vector3 Double)
 }
 
 instance Shader PhongShader where
     {-# INLINE vertexShader #-}
-    vertexShader (PhongShader state (World lightDirection) modelToWorldTransform) vertex@(Vertex _ (Just (TextureCoordinate textureCoord)) (Just (VertexNormal modelNormal))) nthVertex = do
-        let (World worldNormal) = transform modelToWorldTransform modelNormal
+    vertexShader (PhongShader state lightDirection modelToWorldTransform) vertex@(Vertex _ (Just textureCoord) (Just modelNormal)) nthVertex = do
+        let worldNormal = transform modelToWorldTransform modelNormal
         MV.write state nthVertex (dotVect worldNormal lightDirection, textureCoord)
         return vertex
 
@@ -62,12 +62,12 @@ instance Shader PhongShader where
         return (\point -> do
             let tx = triangularInterpolate t1x t2x t3x point
             let ty = triangularInterpolate t1y t2y t3y point
-            let color = getColorFromTexture texture (TextureCoordinate (Point2 tx ty))
+            let color = getColorFromTexture texture (Point2 tx ty)
 
             scaleColor color $ triangularInterpolate n1 n2 n3 point
             )
 
-phongShader :: (PrimMonad m) => World (Vector3 Double) -> Transform (ModelSpace (Vector3 Double)) (World (Vector3 Double)) -> m (PhongShader (PrimState m))
+phongShader :: (PrimMonad m) => Vector3 Double -> Transform (Vector3 Double) (Vector3 Double) -> m (PhongShader (PrimState m))
 phongShader dir modelToWorld = do
     state <- MV.new 3
     return $ PhongShader state dir modelToWorld

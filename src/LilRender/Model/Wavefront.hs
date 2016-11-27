@@ -12,7 +12,7 @@ import           LilRender.Model.Internal
 
 data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 
-vertexPointParser :: Parser VertexPoint
+vertexPointParser :: Parser (Point3 Double)
 vertexPointParser = do
     char 'v'
     skipSpace
@@ -22,9 +22,9 @@ vertexPointParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return . VertexPoint . ModelSpace $ Point3 x y z
+    return $ Point3 x y z
 
-textureCoordParser :: Parser TextureCoordinate
+textureCoordParser :: Parser (Point2 Double)
 textureCoordParser = do
     string "vt"
     skipSpace
@@ -32,9 +32,9 @@ textureCoordParser = do
     skipSpace
     y <- double
     skipWhile $ not . isEndOfLine
-    return . TextureCoordinate $ Point2 x y
+    return $ Point2 x y
 
-vertexNormalParser :: Parser VertexNormal
+vertexNormalParser :: Parser (Vector3 Double)
 vertexNormalParser = do
     string "vn"
     skipSpace
@@ -44,7 +44,7 @@ vertexNormalParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return . VertexNormal . ModelSpace $ Vector3 x y z
+    return $ Vector3 x y z
 
 faceParser :: Parser UnresolvedFace
 faceParser = do
@@ -75,13 +75,13 @@ faceParser = do
             norm <- signed decimal
             return (vert, Just text, Just norm)
 
-vertices :: [T.Text] -> V.Vector VertexPoint
+vertices :: [T.Text] -> V.Vector (Point3 Double)
 vertices = V.fromList . rights . fmap (parseOnly vertexPointParser)
 
-textureCoords :: [T.Text] -> V.Vector TextureCoordinate
+textureCoords :: [T.Text] -> V.Vector (Point2 Double)
 textureCoords = V.fromList . rights . fmap (parseOnly textureCoordParser)
 
-vertexNormals :: [T.Text] -> V.Vector VertexNormal
+vertexNormals :: [T.Text] -> V.Vector (Vector3 Double)
 vertexNormals = V.fromList . rights . fmap (parseOnly vertexNormalParser)
 
 unresolvedFaces :: [T.Text] -> V.Vector UnresolvedFace

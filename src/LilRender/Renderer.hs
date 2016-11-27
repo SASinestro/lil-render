@@ -15,7 +15,7 @@ drawTexturedModel :: (Shader shader) =>
                        Model -- The model to be rendered
                     -> Texture -- The texture
                     -> shader (PrimState IO) -- The shader
-                    -> Transform (ModelSpace (Point3 Double)) (Screen (Point3 Double)) -- The projection from ModelSpace to Screen
+                    -> Transform (Point3 Double) (Point3 Double) -- The projection from ModelSpace to Screen
                     -> MutableImage (PrimState IO) RGBColor -- Target
                     -> IO ()
 drawTexturedModel (Model faces) texture shader projection image =
@@ -25,11 +25,11 @@ drawTexturedModel (Model faces) texture shader projection image =
         drawFilledTriangle image color tri
     )
     where
-        screenTriangleForFace :: Face -> IO (Triangle (Screen (Point3 Double)))
+        screenTriangleForFace :: Face -> IO (Triangle (Point3 Double))
         screenTriangleForFace (Face v1 v2 v3) = do
-            (Vertex (VertexPoint p1) _ _) <- vertexShader shader v1 0
-            (Vertex (VertexPoint p2) _ _) <- vertexShader shader v2 1
-            (Vertex (VertexPoint p3) _ _) <- vertexShader shader v3 2
+            (Vertex p1 _ _) <- vertexShader shader v1 0
+            (Vertex p2 _ _) <- vertexShader shader v2 1
+            (Vertex p3 _ _) <- vertexShader shader v3 2
 
             let p1' = transform projection p1
             let p2' = transform projection p2

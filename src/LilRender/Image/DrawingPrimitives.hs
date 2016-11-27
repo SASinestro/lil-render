@@ -1,5 +1,5 @@
-module LilRender.Image.DrawingPrimitives (drawFilledTriangle
-    , drawTri, wrapColorGetter, wrapGetColor
+module LilRender.Image.DrawingPrimitives (
+      drawFilledTriangle
     ) where
 
 import Control.Monad.Primitive
@@ -14,13 +14,13 @@ import           LilRender.Color
 import           LilRender.Image.Mutable
 import           LilRender.Math.Geometry
 
-foreign import ccall safe "src/LilRender/Image/DrawingPrimitives.h drawTri" drawTri :: Ptr RGBColor -> Ptr Int -> Int -> FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> IO ()
+foreign import ccall safe "src/LilRender/Image/DrawingPrimitives.h drawTri" drawTri :: Ptr RGBColor -> Ptr Int -> Int -> FunPtr (Ptr (Point3 Double) -> Ptr RGBColor -> IO ()) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> Ptr (Point3 Double) -> IO ()
 
-foreign import ccall "wrapper" wrapColorGetter :: (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()))
+foreign import ccall "wrapper" wrapColorGetter :: (Ptr (Point3 Double) -> Ptr RGBColor -> IO ()) -> IO (FunPtr (Ptr (Point3 Double) -> Ptr RGBColor -> IO ()))
 
 {-# INLINE drawFilledTriangle #-}
-drawFilledTriangle :: MutableImage (PrimState IO) RGBColor -> (Barycentric (Point3 Double) -> RGBColor) -> Triangle (Screen (Point3 Double)) -> IO ()
-drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle (Screen vertex1) (Screen vertex2) (Screen vertex3)) =
+drawFilledTriangle :: MutableImage (PrimState IO) RGBColor -> (Point3 Double -> RGBColor) -> Triangle (Point3 Double) -> IO ()
+drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle vertex1 vertex2 vertex3) =
     withForeignPtr (fst $ MV.unsafeToForeignPtr0 pixels) (\pixBuf ->
             withForeignPtr (fst $ MV.unsafeToForeignPtr0 zBuffer) (\zBuf -> do
                 colorLookup <- wrapGetColor getColor
@@ -33,7 +33,7 @@ drawFilledTriangle (MutableImage pixels zBuffer width _) getColor (Triangle (Scr
             )
 
 {-# INLINE wrapGetColor #-}
-wrapGetColor :: (Barycentric (Point3 Double) -> RGBColor) -> IO (FunPtr (Ptr (Barycentric (Point3 Double)) -> Ptr RGBColor -> IO ()))
+wrapGetColor :: (Point3 Double -> RGBColor) -> IO (FunPtr (Ptr (Point3 Double) -> Ptr RGBColor -> IO ()))
 wrapGetColor getColor = wrapColorGetter (\ptr outptr -> do
     point <- peek ptr
     poke outptr $ getColor point

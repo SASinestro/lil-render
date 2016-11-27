@@ -16,10 +16,10 @@ import           Criterion.Measurement    (getTime, initializeTime, secs)
 width = 800
 height = 800
 
-lightDirection = World (Vector3 1.0 1.0 1.0)
+lightDirection = Vector3 1.0 1.0 1.0
 
-center :: Int -> Int -> Screen (Point2 Int)
-center width height = Screen (Point2 x y)
+center :: Int -> Int -> Point2 Int
+center width height = Point2 x y
     where
         x = round ((fromIntegral width) / 8)
         y = round ((fromIntegral height) / 8)
@@ -32,16 +32,16 @@ main = do
     !model <- loadModel WavefrontOBJ "data/african_head/african_head.obj"
     !texture <- loadTexture "data/african_head/african_head_diffuse.tga"
 
-    let cameraLocation = World (Point3 1.0 1.0 3.0)
-    let cameraTarget   = World (Point3 0.0 0.0 0.0)
+    let cameraLocation = Point3 1.0 1.0 3.0
+    let cameraTarget   = Point3 0.0 0.0 0.0
     let camera = cameraTransform cameraLocation cameraTarget
 
     let scale = scale' (3/4)
     let viewport = viewportTransform (center width height) (scale width) (scale height)
 
-    let modelToScreen = (identityTransform :: Transform (ModelSpace (Point3 Double)) (World (Point3 Double))) >>> camera >>> (orthographicProjectionTransform cameraLocation) >>> viewport
+    let modelToScreen = identityTransform >>> camera >>> (orthographicProjectionTransform cameraLocation) >>> viewport
 
-    !shader <- phongShader (normalizeVect <$> lightDirection) identityTransform
+    !shader <- phongShader (normalizeVect lightDirection) identityTransform
 
     initializeTime
 

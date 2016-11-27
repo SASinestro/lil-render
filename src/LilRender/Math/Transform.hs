@@ -57,12 +57,6 @@ instance Transformable (Vector3 Double) where
                 c = mat `mIndex` (3, 1)
                 d = mat `mIndex` (4, 1)
 
-deriving instance (Transformable a) => Transformable (ModelSpace a)
-deriving instance (Transformable a) => Transformable (World a)
-deriving instance (Transformable a) => Transformable (Camera a)
-deriving instance (Transformable a) => Transformable (Clip a)
-deriving instance (Transformable a) => Transformable (Screen a)
-
 {-# INLINE transform #-}
 transform :: (Transformable a, Transformable b) => Transform a b -> a -> b
 transform (Transform mat) a =  fromMatrix (mMult mat (toMatrix a))
@@ -98,11 +92,11 @@ zRotateTransform angle =
 
 --
 
-type CameraLocation = World (Point3 Double)
-type CameraTarget = World (Point3 Double)
+type CameraLocation = Point3 Double
+type CameraTarget = Point3 Double
 
-cameraTransform' :: (Transformable a) => CameraLocation -> CameraTarget -> World (Vector3 Double) -> Transform (World a) (Camera a)
-cameraTransform' (World (Point3 clx cly clz)) (World (Point3 ctx cty ctz)) (World up)
+cameraTransform' :: (Transformable a) => CameraLocation -> CameraTarget -> Vector3 Double -> Transform a a
+cameraTransform' (Point3 clx cly clz) (Point3 ctx cty ctz) up
     = Transform $ mMult minv translate
     where
         z @(Vector3 z1 z2 z3) = normalizeVect $ Vector3 (clx - ctx) (cly - cty) (clz - ctz) -- z is a normal vector from the camera's location to its target
@@ -117,23 +111,23 @@ cameraTransform' (World (Point3 clx cly clz)) (World (Point3 ctx cty ctz)) (Worl
                                         0, 0, 1, -ctz,
                                         0, 0, 0, 1     ]) 4 4
 
-cameraTransform ::CameraLocation -> CameraTarget -> Transform (World (Point3 Double)) (Camera (Point3 Double))
-cameraTransform location target = cameraTransform' location target (World (Vector3 0 1 0)) -- Up is usually up.
+cameraTransform ::CameraLocation -> CameraTarget -> Transform (Point3 Double) (Point3 Double)
+cameraTransform location target = cameraTransform' location target (Vector3 0 1 0) -- Up is usually up.
 
-orthographicProjectionTransform :: (Transformable a) => World (Point3 Double) -> Transform (Camera a) (Clip a)
-orthographicProjectionTransform (World p) = Transform $ Matrix (V.fromList [1, 0, 0, 0,
+orthographicProjectionTransform :: (Transformable a) => Point3 Double -> Transform a a
+orthographicProjectionTransform p = Transform $ Matrix (V.fromList [1, 0, 0, 0,
                                                                             0, 1, 0, 0,
                                                                             0, 0, 1, -1/magnitude p,
                                                                             0, 0, 0, 1 ]) 4 4
     where magnitude = sqrt . foldr (\a b -> a ** 2 + b) 0
 
-type CenterPoint = (Screen (Point2 Int))
+type CenterPoint = Point2 Int
 type Width = Int
 type Height = Int
 type Depth = Int
 
-viewportTransform' :: CenterPoint -> Width -> Height -> Depth -> Transform (Clip (Point3 Double)) (Screen (Point3 Double))
-viewportTransform' (Screen (Point2 x' y')) width height depth =
+viewportTransform' :: CenterPoint -> Width -> Height -> Depth -> Transform (Point3 Double) (Point3 Double)
+viewportTransform' (Point2 x' y') width height depth =
     Transform $ Matrix (V.fromList [ w / 2,  0,  0,  0,  0,  h / 2,  0,  0,  0,  0,  d / 2,  0,  x + w / 2,  y + h / 2,  d / 2,  1 ]) 4 4
     where
         w = fromIntegral width  :: Double
@@ -143,5 +137,5 @@ viewportTransform' (Screen (Point2 x' y')) width height depth =
         x = fromIntegral x'
         y = fromIntegral y'
 
-viewportTransform :: CenterPoint → Width → Height → Transform (Clip (Point3 Double)) (Screen (Point3 Double))
+viewportTransform :: CenterPoint -> Width -> Height -> Transform (Point3 Double) (Point3 Double)
 viewportTransform center width height = viewportTransform' center width height 255

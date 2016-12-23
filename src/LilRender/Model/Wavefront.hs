@@ -5,14 +5,14 @@ import           Data.Attoparsec.Text
 import           Data.Either
 import qualified Data.Text                as T
 import qualified Data.Vector              as V
-
+import Linear
+import Linear.Affine
 import           LilRender.Math.Geometry
-import           LilRender.Math.Vector
 import           LilRender.Model.Internal
 
 data UnresolvedFace = UnresolvedFace (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) (Int, Maybe Int, Maybe Int) deriving (Eq, Show)
 
-vertexPointParser :: Parser (Point3 Double)
+vertexPointParser :: Parser (Point V3 Double)
 vertexPointParser = do
     char 'v'
     skipSpace
@@ -22,9 +22,9 @@ vertexPointParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return $ Point3 x y z
+    return $ P (V3 x y z)
 
-textureCoordParser :: Parser (Point2 Double)
+textureCoordParser :: Parser (Point V2 Double)
 textureCoordParser = do
     string "vt"
     skipSpace
@@ -32,9 +32,9 @@ textureCoordParser = do
     skipSpace
     y <- double
     skipWhile $ not . isEndOfLine
-    return $ Point2 x y
+    return $ P (V2 x y)
 
-vertexNormalParser :: Parser (Vector3 Double)
+vertexNormalParser :: Parser (V3 Double)
 vertexNormalParser = do
     string "vn"
     skipSpace
@@ -44,7 +44,7 @@ vertexNormalParser = do
     skipSpace
     z <- double
     skipWhile $ not . isEndOfLine
-    return $ Vector3 x y z
+    return $ V3 x y z
 
 faceParser :: Parser UnresolvedFace
 faceParser = do
@@ -75,13 +75,13 @@ faceParser = do
             norm <- signed decimal
             return (vert, Just text, Just norm)
 
-vertices :: [T.Text] -> V.Vector (Point3 Double)
+vertices :: [T.Text] -> V.Vector (Point V3 Double)
 vertices = V.fromList . rights . fmap (parseOnly vertexPointParser)
 
-textureCoords :: [T.Text] -> V.Vector (Point2 Double)
+textureCoords :: [T.Text] -> V.Vector (Point V2 Double)
 textureCoords = V.fromList . rights . fmap (parseOnly textureCoordParser)
 
-vertexNormals :: [T.Text] -> V.Vector (Vector3 Double)
+vertexNormals :: [T.Text] -> V.Vector (V3 Double)
 vertexNormals = V.fromList . rights . fmap (parseOnly vertexNormalParser)
 
 unresolvedFaces :: [T.Text] -> V.Vector UnresolvedFace
@@ -89,9 +89,9 @@ unresolvedFaces = V.fromList . rights . fmap (parseOnly faceParser)
 
 faceResolver vert text norm = fmap faceResolver'
         where
-        faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Face (Vertex (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
-                                                                                      (Vertex (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
-                                                                                      (Vertex (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
+        faceResolver' (UnresolvedFace (v1, t1, n1) (v2, t2, n2) (v3, t3, n3))  = Triangle (Vertex (vert `lookup` v1) (text `flookup` t1) (norm `flookup` n1))
+                                                                                          (Vertex (vert `lookup` v2) (text `flookup` t2) (norm `flookup` n2))
+                                                                                          (Vertex (vert `lookup` v3) (text `flookup` t3) (norm `flookup` n3))
         lookup list idx = V.unsafeIndex list (idx - 1)
         flookup list idx = (\index -> V.unsafeIndex list (index - 1)) <$> idx
 

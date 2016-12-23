@@ -3,6 +3,7 @@ module LilRender.Image (
     , ImageIndexType
     , (<!>)
     , makeImage
+    , imgmap
     , loadImage
     , ColorFlag(..)
     , drawImageWith

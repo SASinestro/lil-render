@@ -6,68 +6,72 @@ module LilRender.Shader.Library (
 import           LilRender.Color
 import qualified LilRender.Color.Named    as NC
 import           LilRender.Math.Geometry
-import           LilRender.Math.Transform
-import           LilRender.Math.Vector
+import           Linear
+import           Linear.Affine
+import LilRender.Image
 import           LilRender.Model
 import           LilRender.Shader
 import           LilRender.Texture
-
+import Data.Bifunctor
 import           Control.Monad.Primitive
-import qualified Data.Vector.Mutable      as MV
+import Data.Maybe
+import Data.Primitive.MutVar
+
+--
 
 data GouraudShader st = GouraudShader {
-      _gouraudStateVector           :: MV.MVector st Double
-    , _gouraudLightingDirection     :: Vector3 Double
-    , _gouraudModelToWorldTransform :: Transform (Vector3 Double) (Vector3 Double)
+      _gouraudState    :: MutVar st (Triangle Double)
+    , _gouraudLightDir :: V3 Double
+    , _gouraudWorldMat :: M44 Double
 }
 
 instance Shader GouraudShader where
     {-# INLINE vertexShader #-}
-    vertexShader (GouraudShader state lightDirection modelToWorldTransform) vertex@(Vertex _ _ (Just modelNormal)) nthVertex = do
-        let worldNormal = transform modelToWorldTransform modelNormal
-        MV.write state nthVertex (dotVect worldNormal lightDirection)
-        return vertex
+    vertexShader GouraudShader{..} triangle = do
+        writeMutVar _gouraudState $ dot _gouraudLightDir . transformVector _gouraudWorldMat . fromJust . _vertexNormal <$> triangle
+        return $ _point <$> triangle
 
     {-# INLINE fragmentShader #-}
-    fragmentShader GouraudShader { _gouraudStateVector = state } _ = do
-        n1 <- MV.read state 0
-        n2 <- MV.read state 1
-        n3 <- MV.read state 2
-        return (\point -> NC.orange `scaleColor` triangularInterpolate n1 n2 n3 point)
+    fragmentShader GouraudShader{ _gouraudState = state } = do
+        normals <- readMutVar state
+        return (\point -> NC.white `scaleColor` triangularInterpolate normals point)
 
-gouraudShader :: (PrimMonad m) => Vector3 Double -> Transform (Vector3 Double) (Vector3 Double) -> m (GouraudShader (PrimState m))
+gouraudShader :: (PrimMonad m) => V3 Double -> M44 Double -> m (GouraudShader (PrimState m))
 gouraudShader dir modelToWorld = do
-    state <- MV.new 3
+    state <- newMutVar (Triangle 0 0 0)
     return $ GouraudShader state dir modelToWorld
 
+--
+
 data PhongShader st = PhongShader {
-      _phongStateVector           :: MV.MVector st (Double, Point2 Double)
-    , _phongLightingDirection     :: Vector3 Double
-    , _phongModelToWorldTransform :: Transform (Vector3 Double) (Vector3 Double)
+      _phongState    :: MutVar st (Triangle (Point V2 Double))
+    , _phongLightDir :: V3 Double
+    , _phongWorldMat :: M44 Double
+    , _phongDiffuse  :: Image RGBColor
+    , _phongNormal   :: Image (V3 Double)
 }
 
 instance Shader PhongShader where
     {-# INLINE vertexShader #-}
-    vertexShader (PhongShader state lightDirection modelToWorldTransform) vertex@(Vertex _ (Just textureCoord) (Just modelNormal)) nthVertex = do
-        let worldNormal = transform modelToWorldTransform modelNormal
-        MV.write state nthVertex (dotVect worldNormal lightDirection, textureCoord)
-        return vertex
+    vertexShader PhongShader{..} triangle = do
+        writeMutVar _phongState $ fromJust . _textureCoordinate <$> triangle
+        return $ _point <$> triangle
 
     {-# INLINE fragmentShader #-}
-    fragmentShader PhongShader { _phongStateVector = state } texture = do
-        (n1, Point2 t1x t1y) <- MV.read state 0
-        (n2, Point2 t2x t2y) <- MV.read state 1
-        (n3, Point2 t3x t3y) <- MV.read state 2
+    fragmentShader PhongShader {..} = do
+        textureTri <- readMutVar _phongState
 
         return (\point -> do
-            let tx = triangularInterpolate t1x t2x t3x point
-            let ty = triangularInterpolate t1y t2y t3y point
-            let color = getColorFromTexture texture (Point2 tx ty)
+            let texture   = triangularInterpolateVector textureTri point
 
-            scaleColor color $ triangularInterpolate n1 n2 n3 point
+            let diffuse   = getColorFromTexture _phongDiffuse texture
+            let normal    = getColorFromTexture _phongNormal texture
+            let intensity = dot normal _phongLightDir
+
+            diffuse `scaleColor` intensity
             )
 
-phongShader :: (PrimMonad m) => Vector3 Double -> Transform (Vector3 Double) (Vector3 Double) -> m (PhongShader (PrimState m))
-phongShader dir modelToWorld = do
-    state <- MV.new 3
-    return $ PhongShader state dir modelToWorld
+phongShader :: (PrimMonad m) => V3 Double -> M44 Double -> Image RGBColor -> Image (V3 Double) -> m (PhongShader (PrimState m))
+phongShader dir modelToWorld diffuse normal = do
+    state <- newMutVar (Triangle zero zero zero)
+    return $ PhongShader state dir modelToWorld diffuse normal

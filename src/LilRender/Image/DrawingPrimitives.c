@@ -55,6 +55,7 @@ void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1,
         {
             point[0] = x;
             point[1] = y;
+
             toBarycentric(t_vtx1, t_vtx2, t_vtx3, point, bary);
 
             if (bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0)
@@ -71,7 +72,9 @@ void drawTri(char *image, int *z, int width, ColorGetter getter, double *t_vtx1,
                     image[idx + 1] = color[1];
                     image[idx + 2] = color[2];
                     z[zIdx] = newZ;
+
                 }
+
             }
         }
     }

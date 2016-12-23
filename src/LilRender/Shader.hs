@@ -1,12 +1,12 @@
 module LilRender.Shader (Shader, vertexShader, fragmentShader) where
 
+import Control.Monad.Primitive
 import LilRender.Color
 import LilRender.Math.Geometry
 import LilRender.Model
-import LilRender.Texture
-
-import Control.Monad.Primitive
+import Linear
+import Linear.Affine
 
 class Shader s where
-    vertexShader :: (PrimMonad m) => s (PrimState m) -> Vertex -> Int -> m Vertex
-    fragmentShader :: (PrimMonad m) => s (PrimState m) -> Texture -> m (Point3 Double -> RGBColor)
+    vertexShader   :: (PrimMonad m) => s (PrimState m) -> Triangle Vertex -> m (Triangle (Point V3 Double))
+    fragmentShader :: (PrimMonad m) => s (PrimState m) -> m (Point V3 Double -> RGBColor)
